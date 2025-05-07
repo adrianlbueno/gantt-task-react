@@ -193,7 +193,18 @@ export interface EmptyTask {
   styles?: Partial<ColorStyles>;
 }
 
-export type TaskOrEmpty = Task | EmptyTask;
+export interface UserTask {
+  id: string;
+  type: "user";
+  name: string;
+  parent?: string;
+  comparisonLevel?: number;
+  displayOrder?: number;
+  isDisabled?: boolean;
+  styles?: Partial<ColorStyles>;
+}
+
+export type TaskOrEmpty = Task | EmptyTask | UserTask ;
 
 export type OnArrowDoubleClick = (
   taskFrom: Task,
