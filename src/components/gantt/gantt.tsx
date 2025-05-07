@@ -32,7 +32,7 @@ import { TaskListTableDefault } from "../task-list/task-list-table";
 import { StandardTooltipContent, Tooltip } from "../other/tooltip";
 import { TaskList, TaskListProps } from "../task-list/task-list";
 import { TaskGantt } from "./task-gantt";
-import { sortTasks } from "../../helpers/sort-tasks";
+import { sortTasksByOrderThenDate } from "../../helpers/sort-tasks";
 import { getChildsAndRoots } from "../../helpers/get-childs-and-roots";
 import { getTaskCoordinates as getTaskCoordinatesDefault } from "../../helpers/get-task-coordinates";
 import { getTasksMap } from "../../helpers/get-tasks-map";
@@ -139,12 +139,12 @@ const defaultDistances: Distances = {
   arrowIndent: 20,
   barCornerRadius: 3,
   barFill: 60,
-  columnWidth: 60,
   contextMenuIconWidth: 20,
   contextMenuOptionHeight: 25,
   contextMenuSidePadding: 10,
   dateCellWidth: 220,
   dependenciesCellWidth: 120,
+  columnWidth: 50,
   dependencyFixHeight: 20,
   dependencyFixIndent: 50,
   dependencyFixWidth: 20,
@@ -264,11 +264,16 @@ export const Gantt: React.FC<GanttProps> = ({
   );
 
   const [sortedTasks, setSortedTasks] = useState<TaskOrEmpty[]>(() =>
-    [...tasks].sort(sortTasks)
+    [...tasks].sort(sortTasksByOrderThenDate)
+      .sort((a, b) => {
+        if (a.parent && !b.parent) return 1;
+        if (!a.parent && b.parent) return -1;
+        return 0;
+      })
   );
 
   useEffect(() => {
-    setSortedTasks([...tasks].sort(sortTasks));
+    setSortedTasks([...tasks].sort(sortTasksByOrderThenDate));
   }, [tasks]);
 
   const [childTasksMap, rootTasksMap] = useMemo(
@@ -410,10 +415,26 @@ export const Gantt: React.FC<GanttProps> = ({
     [maxLevelLength, fullRowHeight]
   );
 
+  const groupedTasks = [...visibleTasks].sort((a, b) => {
+    const parentA = a.parent || a.id;
+    const parentB = b.parent || b.id;
+
+    if (parentA !== parentB) {
+      return parentA.localeCompare(parentB);
+    }
+
+    if (a.type === "empty" || b.type === "empty") {
+      return 0;
+    }
+
+    return a.start.getTime() - b.start.getTime();
+  });
+
+
   const [taskToRowIndexMap, rowIndexToTaskMap, mapGlobalRowIndexToTask] =
     useMemo(
-      () => getMapTaskToRowIndex(visibleTasks, comparisonLevels),
-      [visibleTasks, comparisonLevels]
+      () => getMapTaskToRowIndex(groupedTasks, comparisonLevels),
+      [groupedTasks, comparisonLevels]
     );
 
   const {

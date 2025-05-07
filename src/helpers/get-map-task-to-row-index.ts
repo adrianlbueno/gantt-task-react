@@ -11,36 +11,33 @@ import type {
  */
 export const getMapTaskToRowIndex = (
   visibleTasks: readonly TaskOrEmpty[],
-  comparisonLevels: number,
-): [
-  TaskToRowIndexMap,
-  RowIndexToTaskMap,
-  GlobalRowIndexToTaskMap,
-] => {
+  comparisonLevels: number
+): [TaskToRowIndexMap, RowIndexToTaskMap, GlobalRowIndexToTaskMap] => {
   const taskToRowIndexRes = new Map<number, Map<string, number>>();
   const rowIndexToTaskRes = new Map<number, Map<number, TaskOrEmpty>>();
   const globalIndexToTaskRes = new Map<number, TaskOrEmpty>();
 
-  const indexesByLevels: Record<string, number> = {};
+  const groupKeyToRowIndex = new Map<string, number>();
+  let nextRowIndex = 0;
 
   visibleTasks.forEach((task) => {
-    const {
-      id,
-      comparisonLevel = 1,
-    } = task;
+    const { id, parent, comparisonLevel = 1 } = task;
 
-    if (!indexesByLevels[comparisonLevel]) {
-      indexesByLevels[comparisonLevel] = 0;
+    const groupKey = task.rowIndex !== undefined
+      ? `${comparisonLevel}-custom-${task.rowIndex}`
+      : parent || id;
+
+    if (!groupKeyToRowIndex.has(groupKey)) {
+      groupKeyToRowIndex.set(groupKey, nextRowIndex++);
     }
 
-    const index = indexesByLevels[comparisonLevel];
-    ++indexesByLevels[comparisonLevel];
+    const index = groupKeyToRowIndex.get(groupKey)!;
 
-    const indexesMapByLevel = taskToRowIndexRes.get(comparisonLevel) || new Map<string, number>();
+    const indexesMapByLevel = taskToRowIndexRes.get(comparisonLevel) || new Map();
     indexesMapByLevel.set(id, index);
     taskToRowIndexRes.set(comparisonLevel, indexesMapByLevel);
 
-    const rowIndexToTaskAtLevelMap = rowIndexToTaskRes.get(comparisonLevel) || new Map<number, TaskOrEmpty>();
+    const rowIndexToTaskAtLevelMap = rowIndexToTaskRes.get(comparisonLevel) || new Map();
     rowIndexToTaskAtLevelMap.set(index, task);
     rowIndexToTaskRes.set(comparisonLevel, rowIndexToTaskAtLevelMap);
 

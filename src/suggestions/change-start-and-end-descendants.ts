@@ -29,6 +29,7 @@ export const changeStartAndEndDescendants = ({
   const mapTaskToGlobalIndexAtLevel = mapTaskToGlobalIndex.get(
     changedTask.comparisonLevel || 1
   );
+  console.log("mapTaskToGlobalIndexAtLevel", mapTaskToGlobalIndexAtLevel);
 
   if (!mapTaskToGlobalIndexAtLevel) {
     throw new Error("Tasks are not found in the current level");

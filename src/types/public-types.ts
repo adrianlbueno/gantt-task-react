@@ -134,13 +134,13 @@ export interface Distances {
    * From 0 to 100
    */
   barFill: number;
-  columnWidth: number;
   contextMenuIconWidth: number;
   contextMenuOptionHeight: number;
   contextMenuSidePadding: number;
   dateCellWidth: number;
   dependenciesCellWidth: number;
   dependencyFixHeight: number;
+  columnWidth: number;
   dependencyFixIndent: number;
   dependencyFixWidth: number;
   expandIconWidth: number;
@@ -156,7 +156,7 @@ export interface Distances {
   titleCellWidth: number;
 }
 
-export type TaskType = "task" | "milestone" | "project";
+export type TaskType = "task" | "milestone" | "project"| "user";
 
 export interface Task {
   id: string;
@@ -167,6 +167,7 @@ export interface Task {
   /**
    * From 0 to 100
    */
+  rowIndex?: number;
   progress: number;
   assignees?: string[];
   styles?: Partial<ColorStyles>;
@@ -187,6 +188,7 @@ export interface EmptyTask {
   type: "empty";
   name: string;
   parent?: string;
+  rowIndex?: number;
   comparisonLevel?: number;
   displayOrder?: number;
   isDisabled?: boolean;
@@ -199,12 +201,13 @@ export interface UserTask {
   name: string;
   parent?: string;
   comparisonLevel?: number;
-  displayOrder?: number;
+  hideChildren?: boolean;
   isDisabled?: boolean;
+  displayOrder?: number;
   styles?: Partial<ColorStyles>;
 }
 
-export type TaskOrEmpty = Task | EmptyTask | UserTask ;
+export type TaskOrEmpty = Task | EmptyTask;
 
 export type OnArrowDoubleClick = (
   taskFrom: Task,

@@ -19,7 +19,7 @@ export function initTasks(): TaskOrEmpty[] {
       id: "ProjectSample",
       progress: 25,
       type: "project",
-      hideChildren: false
+      hideChildren: false,
     },
     {
       start: new Date(currentDate.getFullYear(), currentDate.getMonth(), 1),
@@ -34,13 +34,13 @@ export function initTasks(): TaskOrEmpty[] {
       id: "Idea",
       progress: 45,
       type: "task",
-      parent: "ProjectSample"
+      parent: "ProjectSample",
     },
     {
       id: "taskWithoutDateId",
       type: "empty",
       name: "TaskWithoutDate",
-      parent: "ProjectSample"
+      parent: "ProjectSample",
     },
     {
       start: new Date(currentDate.getFullYear(), currentDate.getMonth(), 2),
@@ -56,7 +56,8 @@ export function initTasks(): TaskOrEmpty[] {
         }
       ],
       type: "task",
-      parent: "ProjectSample"
+      parent: "ProjectSample",
+      rowIndex: 0
     },
     {
       start: new Date(currentDate.getFullYear(), currentDate.getMonth(), 4),
@@ -72,7 +73,8 @@ export function initTasks(): TaskOrEmpty[] {
         }
       ],
       type: "task",
-      parent: "ProjectSample"
+      parent: "ProjectSample",
+      rowIndex: 0
     },
     {
       start: new Date(currentDate.getFullYear(), currentDate.getMonth(), 8),
@@ -161,7 +163,47 @@ export function initTasks(): TaskOrEmpty[] {
       isDisabled: true,
       isRelationDisabled: true,
       type: "task"
-    }
+    },
+    {
+      id: "u1_a1",
+      name: "User A - Audit 1",
+      type: "project",
+      start: new Date(2025, 4, 1),
+      end: new Date(2025, 4, 3),
+      progress: 0,
+      dependencies: [],
+      hideChildren: false,
+    },
+    {
+      id: "User A - Audit 2",
+      name: "User A - Audit 2",
+      type: "task",
+      start: new Date(2025, 4, 3),
+      end: new Date(2025, 4, 6),
+      progress: 0,
+      parent: "u1_a1",
+      rowIndex: 0,
+    },
+    {
+      id: "testing ",
+      name: "Testing",
+      type: "task",
+      start: new Date(2025, 4, 1),
+      end: new Date(2025, 4, 4),
+      progress: 0,
+      parent: "u1_a1",
+      rowIndex: 0,
+    },
+    {
+      id: "testing 2",
+      name: "Testing 2",
+      type: "task",
+      start: new Date(2025, 4, 4),
+      end: new Date(2025, 4, 7),
+      progress: 0,
+      parent: "u1_a1",
+      rowIndex: 0,
+    },
   ];
 
   return tasks.map(taskOrEmpty => {
