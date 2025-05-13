@@ -51,7 +51,7 @@ export const copyTasks = (
       ? idToCopiedIdAtLevelMap.get(parent)
       : undefined;
 
-    if (originalTask.type === "empty") {
+    if (originalTask.type === "empty" || originalTask.type === "user") {
       return {
         ...originalTask,
         id: newId,
@@ -62,6 +62,7 @@ export const copyTasks = (
     const {
       dependencies,
     } = originalTask;
+
 
     return {
       ...originalTask,

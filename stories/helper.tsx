@@ -1,209 +1,122 @@
+import endOfDay from "date-fns/endOfDay";
 import format from "date-fns/format";
 import isValid from "date-fns/isValid";
 import parse from "date-fns/parse";
-import startOfMinute from "date-fns/startOfMinute";
 import startOfDay from "date-fns/startOfDay";
-import endOfDay from "date-fns/endOfDay";
+import startOfMinute from "date-fns/startOfMinute";
 
 import { EmptyTask, Task, TaskOrEmpty } from "../src";
 
 const dateFormat = "dd/MM/yyyy HH:mm";
 
-export function initTasks(): TaskOrEmpty[] {
+export function initTasksUser(): TaskOrEmpty[] {
   const currentDate = new Date();
   const tasks: TaskOrEmpty[] = [
     {
-      start: new Date(currentDate.getFullYear(), currentDate.getMonth(), 2),
-      end: new Date(currentDate.getFullYear(), currentDate.getMonth(), 8),
-      name: "Some Project",
-      id: "ProjectSample",
-      progress: 25,
-      type: "project",
-      hideChildren: false,
+      id: "user-1",
+      type: "user",
+      name: "Adrian Bueno",
+      hideChildren: true,
     },
     {
-      start: new Date(currentDate.getFullYear(), currentDate.getMonth(), 1),
-      end: new Date(
-        currentDate.getFullYear(),
-        currentDate.getMonth(),
-        2,
-        12,
-        28
-      ),
-      name: "Idea",
-      id: "Idea",
-      progress: 45,
+      id: "audit-1",
       type: "task",
-      parent: "ProjectSample",
-    },
-    {
-      id: "taskWithoutDateId",
-      type: "empty",
-      name: "TaskWithoutDate",
-      parent: "ProjectSample",
-    },
-    {
-      start: new Date(currentDate.getFullYear(), currentDate.getMonth(), 2),
-      end: new Date(currentDate.getFullYear(), currentDate.getMonth(), 4, 0, 0),
-      name: "Research",
-      id: "Research",
-      progress: 25,
-      dependencies: [
-        {
-          sourceId: "Idea",
-          sourceTarget: "endOfTask",
-          ownTarget: "startOfTask"
-        }
-      ],
-      type: "task",
-      parent: "ProjectSample",
-      rowIndex: 0
-    },
-    {
-      start: new Date(currentDate.getFullYear(), currentDate.getMonth(), 4),
-      end: new Date(currentDate.getFullYear(), currentDate.getMonth(), 8, 0, 0),
-      name: "Discussion with team",
-      id: "Discussion",
-      progress: 10,
-      dependencies: [
-        {
-          sourceId: "Research",
-          sourceTarget: "endOfTask",
-          ownTarget: "startOfTask"
-        }
-      ],
-      type: "task",
-      parent: "ProjectSample",
-      rowIndex: 0
-    },
-    {
+      name: "Audit 1 first in the list",
       start: new Date(currentDate.getFullYear(), currentDate.getMonth(), 8),
-      end: new Date(
-        currentDate.getFullYear(),
-        currentDate.getMonth(),
-        10,
-        0,
-        0
-      ),
-      name: "Developing",
-      id: "developing",
+      end: new Date(currentDate.getFullYear(), currentDate.getMonth(), 12),
       progress: 50,
-      dependencies: [
-        {
-          sourceId: "Discussion",
-          sourceTarget: "endOfTask",
-          ownTarget: "startOfTask"
-        }
-      ],
-      type: "project",
-      parent: "ProjectSample",
-      isDisabled: true,
-      hideChildren: true
+      parent: "user-1",
     },
     {
-      start: new Date(currentDate.getFullYear(), currentDate.getMonth(), 8),
-      end: new Date(currentDate.getFullYear(), currentDate.getMonth(), 9),
-      name: "Code",
-      id: "code",
+      id: "audit-2",
       type: "task",
-      progress: 40,
-      parent: "developing"
-    },
-    {
-      start: new Date(currentDate.getFullYear(), currentDate.getMonth(), 8),
-      end: new Date(currentDate.getFullYear(), currentDate.getMonth(), 9),
-      name: "Frontend",
-      id: "frontend",
-      type: "task",
-      progress: 40,
-      parent: "code",
-      assignees: ["Bob", "Peter"]
-    },
-    {
-      start: new Date(currentDate.getFullYear(), currentDate.getMonth(), 8),
-      end: new Date(currentDate.getFullYear(), currentDate.getMonth(), 9),
-      name: "Backend",
-      id: "backend",
-      type: "task",
-      progress: 40,
-      parent: "code",
-      assignees: ["Marc"]
-    },
-    {
-      start: new Date(currentDate.getFullYear(), currentDate.getMonth(), 8),
-      end: new Date(currentDate.getFullYear(), currentDate.getMonth(), 10),
-      name: "Review",
-      id: "review",
-      type: "task",
-      progress: 70,
-      parent: "developing"
-    },
-    {
+      name: "Audit 2 last in the list",
       start: new Date(currentDate.getFullYear(), currentDate.getMonth(), 15),
       end: new Date(currentDate.getFullYear(), currentDate.getMonth(), 15),
-      name: "Release",
-      id: "release",
-      progress: currentDate.getMonth(),
-      type: "milestone",
-      dependencies: [
-        {
-          sourceId: "review",
-          sourceTarget: "endOfTask",
-          ownTarget: "startOfTask"
-        }
-      ],
-      parent: "ProjectSample"
+      progress: 50,
+      parent: "user-1",
     },
     {
-      start: new Date(currentDate.getFullYear(), currentDate.getMonth(), 18),
-      end: new Date(currentDate.getFullYear(), currentDate.getMonth(), 19),
-      name: "Party Time",
-      id: "party",
-      progress: 0,
-      isDisabled: true,
-      isRelationDisabled: true,
-      type: "task"
+      id: "audit-3",
+      type: "task",
+      name: "Audit 2",
+      start: new Date(currentDate.getFullYear(), currentDate.getMonth(), 8),
+      end: new Date(currentDate.getFullYear(), currentDate.getMonth(), 15),
+      progress: 30,
+      parent: "user-1",
     },
     {
-      id: "u1_a1",
-      name: "User A - Audit 1",
-      type: "project",
-      start: new Date(2025, 4, 1),
-      end: new Date(2025, 4, 3),
-      progress: 0,
-      dependencies: [],
+      id: "audit-unique",
+      type: "task",
+      name: "new task",
+      start: new Date(currentDate.getFullYear(), currentDate.getMonth(), 8),
+      end: new Date(currentDate.getFullYear(), currentDate.getMonth(), 15),
+      progress: 30,
+      parent: "user-1",
+    },
+    {
+      id: "audit-4",
+      type: "task",
+      name: "Audit 3",
+      start: new Date(currentDate.getFullYear(), currentDate.getMonth(), 15),
+      end: new Date(currentDate.getFullYear(), currentDate.getMonth(), 10),
+      progress: 70,
+      parent: "user-1",
+    },
+    {
+      id: "emptyTask",
+      name: "EmptyTask",
+      type: "empty",
       hideChildren: false,
     },
     {
-      id: "User A - Audit 2",
-      name: "User A - Audit 2",
+      id: "audit-4 no dates",
       type: "task",
-      start: new Date(2025, 4, 3),
-      end: new Date(2025, 4, 6),
-      progress: 0,
-      parent: "u1_a1",
-      rowIndex: 0,
+      name: "Audit testing",
+      start: new Date(currentDate.getFullYear(), currentDate.getMonth(), 15),
+      end: new Date(currentDate.getFullYear(), currentDate.getMonth(), 15),
+      progress: 70,
+      parent: "user-1",
     },
     {
-      id: "testing ",
-      name: "Testing",
-      type: "task",
-      start: new Date(2025, 4, 1),
-      end: new Date(2025, 4, 4),
-      progress: 0,
-      parent: "u1_a1",
-      rowIndex: 0,
+      id: "ProjectId",
+      type: "empty",
+      name: "Project one",
+      displayOrder: 4,
+      hideChildren: true,
     },
     {
-      id: "testing 2",
-      name: "Testing 2",
+      id: "Project-new",
       type: "task",
-      start: new Date(2025, 4, 4),
-      end: new Date(2025, 4, 7),
-      progress: 0,
-      parent: "u1_a1",
-      rowIndex: 0,
+      name: "testing project",
+      start: new Date(currentDate.getFullYear(), currentDate.getMonth(), 17),
+      end: new Date(currentDate.getFullYear(), currentDate.getMonth(), 18),
+      progress: 70,
+      parent: "ProjectId",
+      hideChildren: false
     },
+    {
+      id: "Project-new-2",
+      type: "task",
+      name: "testing project 2",
+      start: new Date(currentDate.getFullYear(), currentDate.getMonth(), 17),
+      end: new Date(currentDate.getFullYear(), currentDate.getMonth(), 18),
+      progress: 70,
+      parent: "ProjectId",
+      hideChildren: false
+    },
+    {
+      id: "Project-new-3",
+      type: "task",
+      name: "testing project 3",
+      start: new Date(currentDate.getFullYear(), currentDate.getMonth(), 17),
+      end: new Date(currentDate.getFullYear(), currentDate.getMonth(), 18),
+      progress: 70,
+      parent: "ProjectId",
+      hideChildren: false
+    },
+
+
   ];
 
   return tasks.map(taskOrEmpty => {
@@ -219,6 +132,7 @@ export function initTasks(): TaskOrEmpty[] {
     return taskOrEmpty;
   });
 }
+
 
 export const getTaskFields = (initialValues: {
   name?: string;

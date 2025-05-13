@@ -1,5 +1,5 @@
-import React, { memo, useMemo, useState } from "react";
 import type { ReactNode } from "react";
+import React, { memo, useMemo, useState } from "react";
 
 import { checkHasChildren } from "../../helpers/check-has-children";
 import { Task, TaskListTableProps, TaskOrEmpty } from "../../types/public-types";
@@ -14,6 +14,7 @@ const TaskListTableDefaultInner: React.FC<TaskListTableProps> = ({
   columns,
   cutIdsMirror,
   dateSetup,
+  enableTaskGrouping,
   dependencyMap,
   distances,
   fontFamily,
@@ -39,14 +40,27 @@ const TaskListTableDefaultInner: React.FC<TaskListTableProps> = ({
   tasks,
 }) => {
 
-  const renderedTasks = useMemo(
-    /**
-     * TO DO: maybe consider tasks on other levels?
-     */
-    () =>
-      tasks.filter(task => !task.comparisonLevel || task.comparisonLevel === 1),
-    [tasks]
-  );
+  const renderedTasks = useMemo(() => {
+
+    console.log("enableTaskGrouping", enableTaskGrouping)
+
+    if (!enableTaskGrouping) {
+      return tasks;
+    }
+
+    // ✅ Grouping enabled: filter out children of collapsed users
+    return tasks.filter(task => {
+      const parent = tasks.find(t => t.id === task.parent);
+
+      const isGroupedChildOfCollapsedUser =
+        parent &&
+        parent.type === "user" &&
+        parent.hideChildren === true;
+
+      return !isGroupedChildOfCollapsedUser;
+    });
+  }, [tasks, enableTaskGrouping]);
+
 
   const [draggedTask, setDraggedTask] = useState<TaskOrEmpty>(null);
 

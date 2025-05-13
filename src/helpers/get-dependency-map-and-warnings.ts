@@ -8,7 +8,8 @@ import type {
   TaskMapByLevel,
   TaskOrEmpty,
 } from "../types/public-types";
-import { getCoordinatesOnLevel, getMapTaskToCoordinatesOnLevel } from "./get-task-coordinates";
+import { isRealTask } from "./check-is-real-task";
+import { getMapTaskToCoordinatesOnLevel } from "./get-task-coordinates";
 
 export const getDependencyMapAndWarnings = (
   tasks: readonly TaskOrEmpty[],
@@ -26,7 +27,7 @@ export const getDependencyMapAndWarnings = (
   const isCollectMargins = isShowDependencyWarnings || isShowCriticalPath;
 
   tasks.forEach((task) => {
-    if (task.type === 'empty') {
+    if (!isRealTask(task)) {
       return;
     }
 
@@ -41,7 +42,7 @@ export const getDependencyMapAndWarnings = (
     }
 
     const tasksByLevel = tasksMap.get(comparisonLevel);
-    
+
     if (!dependencies || !tasksByLevel) {
       return;
     }
@@ -58,9 +59,10 @@ export const getDependencyMapAndWarnings = (
     const dependenciesByTask = dependenciesByLevel.get(id) || [];
     const marginsByTask = marginsByLevel.get(id) || new Map<string, number>();
 
-    const {
-      y: toY,
-    } = getCoordinatesOnLevel(id, coordinatesOnLevelMap);
+    const toCoords = coordinatesOnLevelMap.get(id);
+    if (!toCoords) return;
+
+    const { y: toY } = toCoords;
 
     dependencies.forEach(({
       sourceId,
@@ -78,13 +80,14 @@ export const getDependencyMapAndWarnings = (
         return;
       }
 
-      if (source.type === 'empty') {
+      if (source.type === 'empty' || source.type === 'user') {
         return;
       }
 
-      const {
-        y: fromY,
-      } = getCoordinatesOnLevel(sourceId, coordinatesOnLevelMap);
+      const fromCoords = coordinatesOnLevelMap.get(sourceId);
+      if (!fromCoords) return;
+
+      const { y: fromY } = fromCoords;
 
       const minY = Math.min(fromY, toY);
       const maxY = Math.max(fromY, toY);

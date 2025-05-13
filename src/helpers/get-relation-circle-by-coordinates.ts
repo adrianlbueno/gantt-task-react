@@ -20,7 +20,8 @@ export const getRelationCircleByCoordinates = (
   for (let i = 0, l = tasks.length; i < l; ++i) {
     const task = tasks[i];
 
-    if (task.type !== "empty") {
+
+    if (task.type !== "empty" && task.type !== "user") {
       const taskCoordinates = getCoordinatesOnLevel(
         task.id,
         mapTaskToCoordinatesOnLevel
@@ -32,7 +33,7 @@ export const getRelationCircleByCoordinates = (
       ) {
         if (
           x >=
-            taskCoordinates.x1 - relationCircleOffset - relationCircleRadius &&
+          taskCoordinates.x1 - relationCircleOffset - relationCircleRadius &&
           x <= taskCoordinates.x1 - relationCircleOffset + relationCircleRadius
         ) {
           return [task, rtl ? "endOfTask" : "startOfTask"];
@@ -40,7 +41,7 @@ export const getRelationCircleByCoordinates = (
 
         if (
           x >=
-            taskCoordinates.x2 + relationCircleOffset - relationCircleRadius &&
+          taskCoordinates.x2 + relationCircleOffset - relationCircleRadius &&
           x <= taskCoordinates.x2 + relationCircleOffset + relationCircleRadius
         ) {
           return [task, rtl ? "startOfTask" : "endOfTask"];

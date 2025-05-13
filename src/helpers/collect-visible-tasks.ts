@@ -8,9 +8,12 @@ const collectChildren = (
   arrayRes: TaskOrEmpty[],
   mirrorRes: Record<string, true>,
   task: TaskOrEmpty,
-  childTasksOnLevel: Map<string, TaskOrEmpty[]>
+  childTasksOnLevel: Map<string, TaskOrEmpty[]>,
+  enableTaskGrouping: boolean
 ) => {
   const { comparisonLevel = 1 } = task;
+
+  console.log(`Task ${task.id} visibility check: type=${task.type}, hideChildren=${task.hideChildren}, will ${(task.type === "empty" || (task.hideChildren && task.type !== "user")) ? 'hide' : 'show'} children`);
 
   arrayRes.push(task);
 
@@ -18,21 +21,27 @@ const collectChildren = (
     mirrorRes[task.id] = true;
   }
 
-  if (task.type === "empty" || task.hideChildren) {
+  if (
+    task.type === "empty" ||
+    (enableTaskGrouping
+      ? task.hideChildren && task.type !== "user"
+      : task.hideChildren)
+  ) {
     return;
   }
 
   const childs = childTasksOnLevel.get(task.id);
   if (childs && childs.length > 0) {
     childs.forEach(childTask => {
-      collectChildren(arrayRes, mirrorRes, childTask, childTasksOnLevel);
+      collectChildren(arrayRes, mirrorRes, childTask, childTasksOnLevel, enableTaskGrouping);
     });
   }
 };
 
 export const collectVisibleTasks = (
   childTasksMap: ChildByLevelMap,
-  rootTasksMap: RootMapByLevel
+  rootTasksMap: RootMapByLevel,
+  enableTaskGrouping: boolean
 ): [readonly TaskOrEmpty[], Readonly<Record<string, true>>] => {
   const arrayRes: TaskOrEmpty[] = [];
   const mirrorRes: Record<string, true> = {};
@@ -42,7 +51,7 @@ export const collectVisibleTasks = (
       childTasksMap.get(comparisonLevel) || new Map<string, TaskOrEmpty[]>();
 
     rootTasks.forEach(task => {
-      collectChildren(arrayRes, mirrorRes, task, childTasksOnLevel);
+      collectChildren(arrayRes, mirrorRes, task, childTasksOnLevel, enableTaskGrouping);
     });
   }
 

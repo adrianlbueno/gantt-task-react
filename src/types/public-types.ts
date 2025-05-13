@@ -2,8 +2,8 @@ import type { ComponentType, MouseEvent, ReactNode } from "react";
 
 import type { Locale as DateLocale } from "date-fns";
 
-import { OptimizedListParams } from "../helpers/use-optimized-list";
 import { TaskListHeaderActionsProps } from "../components/task-list/TaskListHeaderActions";
+import { OptimizedListParams } from "../helpers/use-optimized-list";
 
 export enum ViewMode {
   Hour = "Hour",
@@ -134,13 +134,13 @@ export interface Distances {
    * From 0 to 100
    */
   barFill: number;
+  columnWidth: number;
   contextMenuIconWidth: number;
   contextMenuOptionHeight: number;
   contextMenuSidePadding: number;
   dateCellWidth: number;
   dependenciesCellWidth: number;
   dependencyFixHeight: number;
-  columnWidth: number;
   dependencyFixIndent: number;
   dependencyFixWidth: number;
   expandIconWidth: number;
@@ -156,7 +156,7 @@ export interface Distances {
   titleCellWidth: number;
 }
 
-export type TaskType = "task" | "milestone" | "project"| "user";
+export type TaskType = "task" | "milestone" | "project";
 
 export interface Task {
   id: string;
@@ -167,7 +167,6 @@ export interface Task {
   /**
    * From 0 to 100
    */
-  rowIndex?: number;
   progress: number;
   assignees?: string[];
   styles?: Partial<ColorStyles>;
@@ -188,26 +187,26 @@ export interface EmptyTask {
   type: "empty";
   name: string;
   parent?: string;
-  rowIndex?: number;
   comparisonLevel?: number;
   displayOrder?: number;
   isDisabled?: boolean;
   styles?: Partial<ColorStyles>;
-}
+  hideChildren?: boolean
 
+}
 export interface UserTask {
   id: string;
   type: "user";
   name: string;
   parent?: string;
   comparisonLevel?: number;
-  hideChildren?: boolean;
-  isDisabled?: boolean;
   displayOrder?: number;
+  isDisabled?: boolean;
   styles?: Partial<ColorStyles>;
+  hideChildren?: boolean;
 }
 
-export type TaskOrEmpty = Task | EmptyTask;
+export type TaskOrEmpty = Task | EmptyTask | UserTask;
 
 export type OnArrowDoubleClick = (
   taskFrom: Task,
@@ -303,60 +302,60 @@ export type FixPosition = (
 
 export type OnChangeTasksAction =
   | {
-  type: "add_tasks";
-}
+    type: "add_tasks";
+  }
   | {
-  type: "date_change";
-}
+    type: "date_change";
+  }
   | {
-  type: "delete_relation";
-  payload: {
-    taskFrom: Task;
-    taskFromIndex: number;
-    taskTo: Task;
-    taskToIndex: number;
+    type: "delete_relation";
+    payload: {
+      taskFrom: Task;
+      taskFromIndex: number;
+      taskTo: Task;
+      taskToIndex: number;
+    };
+  }
+  | {
+    type: "delete_task";
+    payload: {
+      tasks: readonly TaskOrEmpty[];
+      taskIndexes: readonly number[];
+    };
+  }
+  | {
+    type: "edit_task";
+  }
+  | {
+    type: "fix_dependency_position";
+  }
+  | {
+    type: "fix_end_position";
+  }
+  | {
+    type: "fix_start_position";
+  }
+  | {
+    type: "move_task_before";
+  }
+  | {
+    type: "move_task_after";
+  }
+  | {
+    type: "move_task_inside";
+  }
+  | {
+    type: "progress_change";
+  }
+  | {
+    type: "relation_change";
+  }
+  | {
+    type: "expandState_change";
+    payload: {
+      changedTask: Task;
+    };
   };
-}
-  | {
-  type: "delete_task";
-  payload: {
-    tasks: readonly TaskOrEmpty[];
-    taskIndexes: readonly number[];
-  };
-}
-  | {
-  type: "edit_task";
-}
-  | {
-  type: "fix_dependency_position";
-}
-  | {
-  type: "fix_end_position";
-}
-  | {
-  type: "fix_start_position";
-}
-  | {
-  type: "move_task_before";
-}
-  | {
-  type: "move_task_after";
-}
-  | {
-  type: "move_task_inside";
-}
-  | {
-  type: "progress_change";
-}
-  | {
-  type: "relation_change";
-}
-  | {
-  type: "expandState_change";
-  payload: {
-    changedTask: Task;
-  };
-};
 
 export type RelationKind =
   | "startToStart"
@@ -612,6 +611,7 @@ export interface GanttProps extends EventOption, DisplayOption, StylingOption {
   /**
    * Can be used to compare multiple graphs. This prop is the number of graps being compared
    */
+  enableTaskGrouping?: boolean;
   comparisonLevels?: number;
   contextMenuOptions?: ContextMenuOptionType[];
   enableTableListContextMenu?: number;
@@ -628,6 +628,7 @@ export interface GanttProps extends EventOption, DisplayOption, StylingOption {
 
 export interface TaskListTableProps {
   canMoveTasks: boolean;
+  enableTaskGrouping?: boolean;
   childTasksMap: ChildByLevelMap;
   colors: ColorStyles;
   columns: readonly Column[];
@@ -682,6 +683,8 @@ export type TaskToRowIndexMap = Map<number, Map<string, number>>;
 
 // comparison level -> index of the row containing the task -> task id
 export type RowIndexToTaskMap = Map<number, Map<number, TaskOrEmpty>>;
+
+export type RowIndexToTasksMap = Map<number, Map<number, TaskOrEmpty[]>>;
 
 // global row index (tasks at different comparison levels have different indexes) -> the task
 export type GlobalRowIndexToTaskMap = Map<number, TaskOrEmpty>;
@@ -855,47 +858,47 @@ export type OnResizeColumn = (
 ) => void;
 export type ChangeAction =
   | {
-  type: "add-childs";
-  parent: Task;
-  // comparison level -> task id
-  addedIdsMap: Map<number, Set<string>>;
-  addedChildsByLevelMap: ChildByLevelMap;
-  addedRootsByLevelMap: RootMapByLevel;
-  descendants: readonly TaskOrEmpty[];
-}
+    type: "add-childs";
+    parent: Task;
+    // comparison level -> task id
+    addedIdsMap: Map<number, Set<string>>;
+    addedChildsByLevelMap: ChildByLevelMap;
+    addedRootsByLevelMap: RootMapByLevel;
+    descendants: readonly TaskOrEmpty[];
+  }
   | {
-  type: "change";
-  task: TaskOrEmpty;
-}
+    type: "change";
+    task: TaskOrEmpty;
+  }
   | {
-  type: "change_start_and_end";
-  task: Task;
-  changedTask: Task;
-  originalTask: Task;
-}
+    type: "change_start_and_end";
+    task: Task;
+    changedTask: Task;
+    originalTask: Task;
+  }
   | {
-  type: "delete";
-  tasks: readonly TaskOrEmpty[];
-  // comparison level -> task id
-  deletedIdsMap: Map<number, Set<string>>;
-}
+    type: "delete";
+    tasks: readonly TaskOrEmpty[];
+    // comparison level -> task id
+    deletedIdsMap: Map<number, Set<string>>;
+  }
   | {
-  type: "move-before";
-  target: TaskOrEmpty;
-  taskForMove: TaskOrEmpty;
-}
+    type: "move-before";
+    target: TaskOrEmpty;
+    taskForMove: TaskOrEmpty;
+  }
   | {
-  type: "move-after";
-  target: TaskOrEmpty;
-  taskForMove: TaskOrEmpty;
-}
+    type: "move-after";
+    target: TaskOrEmpty;
+    taskForMove: TaskOrEmpty;
+  }
   | {
-  type: "move-inside";
-  parent: Task;
-  childs: readonly TaskOrEmpty[];
-  // comparison level -> task id
-  movedIdsMap: Map<number, Set<string>>;
-};
+    type: "move-inside";
+    parent: Task;
+    childs: readonly TaskOrEmpty[];
+    // comparison level -> task id
+    movedIdsMap: Map<number, Set<string>>;
+  };
 
 export type ChangeMetadata = [
   /**

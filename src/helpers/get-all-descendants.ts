@@ -5,8 +5,8 @@ import type {
 } from "../types/public-types";
 
 const fillDescendantsForTask = <
-IsCollectEmpty extends boolean,
-ResultItem extends Task | TaskOrEmpty = (IsCollectEmpty extends true ? TaskOrEmpty : Task),
+  IsCollectEmpty extends boolean,
+  ResultItem extends Task | TaskOrEmpty = (IsCollectEmpty extends true ? TaskOrEmpty : Task),
 >(
   res: ResultItem[],
   task: Task,
@@ -20,7 +20,7 @@ ResultItem extends Task | TaskOrEmpty = (IsCollectEmpty extends true ? TaskOrEmp
   }
 
   childs.forEach((child) => {
-    if (child.type === "empty") {
+    if (child.type === "empty" || child.type === "user") {
       if (isCollectEmpty) {
         res.push(child as ResultItem);
       }
@@ -35,8 +35,8 @@ ResultItem extends Task | TaskOrEmpty = (IsCollectEmpty extends true ? TaskOrEmp
 };
 
 export const getAllDescendants = <
-IsCollectEmpty extends boolean,
-ResultItem extends Task | TaskOrEmpty = (IsCollectEmpty extends true ? TaskOrEmpty : Task),
+  IsCollectEmpty extends boolean,
+  ResultItem extends Task | TaskOrEmpty = (IsCollectEmpty extends true ? TaskOrEmpty : Task),
 >(
   task: Task,
   childTasksMap: ChildByLevelMap,

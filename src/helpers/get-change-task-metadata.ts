@@ -13,6 +13,7 @@ import type {
   TaskOrEmpty,
   TaskToGlobalIndexMap,
 } from "../types/public-types";
+import { isRealTask } from "./check-is-real-task";
 import { collectParents } from "./collect-parents";
 import { getAllDescendants } from "./get-all-descendants";
 
@@ -122,12 +123,12 @@ export const getChangeTaskMetadata = ({
   const descendantSuggestions =
     changeAction.type === "change_start_and_end"
       ? changeStartAndEndDescendants({
-          adjustTaskToWorkingDates,
-          changedTask: changeAction.changedTask,
-          descendants,
-          mapTaskToGlobalIndex,
-          originalTask: changeAction.originalTask,
-        })
+        adjustTaskToWorkingDates,
+        changedTask: changeAction.changedTask,
+        descendants,
+        mapTaskToGlobalIndex,
+        originalTask: changeAction.originalTask,
+      })
       : [];
 
   const suggestedTasks = [...parentSuggestedTasks, ...descendants];
@@ -155,9 +156,13 @@ const getSuggestedStartEndChangesFromDirectChildren = (
   const resIndex = typeof index === "number" ? index : -1;
 
   const id2Task: Map<string, TaskOrEmpty> = tasksMap.get(comparisonLevel);
-  const tasks = Array.from(id2Task.values()).filter(
-    ({ type }) => type !== "empty"
+
+  /*const tasks = Array.from(id2Task.values()).filter(
   ) as Task[];
+  */
+  const tasks = Array.from(id2Task.values()).filter(isRealTask);
+
+
   const directChildren = tasks
     .filter(task => {
       // as the task is deleted, it must be ignored in the parent start end
@@ -173,7 +178,7 @@ const getSuggestedStartEndChangesFromDirectChildren = (
       // replace the current child by its changes version
       if (type == "change" || type == "change_start_and_end") {
         if (child.id === changeAction.task.id) {
-          if (changeAction.task.type !== "empty") {
+          if (isRealTask(changeAction.task)) {
             return changeAction.task;
           }
         }

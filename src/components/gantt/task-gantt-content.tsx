@@ -1,33 +1,33 @@
-import React, { useMemo } from "react";
 import type { MouseEvent, ReactNode } from "react";
+import React, { useMemo } from "react";
 
+import { checkHasChildren } from "../../helpers/check-has-children";
+import { checkTaskHasDependencyWarning } from "../../helpers/check-task-has-dependency-warning";
+import type { OptimizedListParams } from "../../helpers/use-optimized-list";
+import { GanttRelationEvent } from "../../types/gantt-task-actions";
 import {
   BarMoveAction,
   ChildByLevelMap,
   ChildOutOfParentWarnings,
   ColorStyles,
   CriticalPaths,
+  DateExtremity,
   DependencyMap,
   DependentMap,
   Distances,
   FixPosition,
   GlobalRowIndexToTaskMap,
   RelationKind,
-  DateExtremity,
   Task,
   TaskContextualPaletteProps,
   TaskCoordinates,
+  TaskDependencyContextualPaletteProps,
   TaskOrEmpty,
   TaskToHasDependencyWarningMap,
-  TaskDependencyContextualPaletteProps,
 } from "../../types/public-types";
 import { Arrow } from "../other/arrow";
 import { RelationLine } from "../other/relation-line";
 import { TaskItem } from "../task-item/task-item";
-import { GanttRelationEvent } from "../../types/gantt-task-actions";
-import { checkHasChildren } from "../../helpers/check-has-children";
-import { checkTaskHasDependencyWarning } from "../../helpers/check-task-has-dependency-warning";
-import type { OptimizedListParams } from "../../helpers/use-optimized-list";
 
 export type TaskGanttContentProps = {
   authorizedRelations: RelationKind[];
@@ -146,6 +146,9 @@ export const TaskGanttContent: React.FC<TaskGanttContentProps> = ({
       Record<string, Record<string, true>>
     > = {};
 
+    console.log("mapGlobalRowIndexToTask", mapGlobalRowIndexToTask);
+
+
     for (let index = start; index <= end; ++index) {
       const task = mapGlobalRowIndexToTask.get(index);
 
@@ -174,7 +177,7 @@ export const TaskGanttContent: React.FC<TaskGanttContentProps> = ({
         continue;
       }
 
-      if (task.type === "empty") {
+      if (task.type === "empty" || task.type === "user") {
         continue;
       }
 
@@ -216,9 +219,9 @@ export const TaskGanttContent: React.FC<TaskGanttContentProps> = ({
             hasDependencyWarning={
               taskToHasDependencyWarningMap
                 ? checkTaskHasDependencyWarning(
-                    task,
-                    taskToHasDependencyWarningMap
-                  )
+                  task,
+                  taskToHasDependencyWarningMap
+                )
                 : false
             }
             progressWidth={progressWidth}

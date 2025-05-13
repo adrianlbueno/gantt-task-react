@@ -2,10 +2,10 @@ import {
   ChildByLevelMap,
   CriticalPath,
   CriticalPaths,
+  DateExtremity,
   DependencyMap,
   DependencyMargins,
   ExpandedDependency,
-  DateExtremity,
   RootMapByLevel,
   Task,
   TaskMapByLevel,
@@ -42,7 +42,7 @@ const getLatestTasks = (
   }
 
   return childs.reduce<Task[]>((res, child) => {
-    if (child.type === "empty") {
+    if (child.type === "empty" || child.type === "user") {
       return res;
     }
 
@@ -81,7 +81,7 @@ const collectCriticalPath = (
   }
 
   taskChilds.forEach(childTask => {
-    if (childTask.type === "empty") {
+    if (childTask.type === "empty" || childTask.type === "user") {
       return;
     }
 
@@ -237,7 +237,7 @@ export const getCriticalPath = (
         dependencyMarginsMap.get(comparisonLevel);
 
       rootTasks.forEach(task => {
-        if (task.type === "empty") {
+        if (task.type === "empty" || task.type === "user") {
           return;
         }
 

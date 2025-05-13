@@ -20,6 +20,7 @@ export const getChildsAndRoots = (
       comparisonLevel = 1,
     } = task;
 
+
     if (!parent || (checkIsRoot && checkIsRoot(task))) {
       const rootOnLevel = rootRes.get(comparisonLevel) || [];
       rootRes.set(comparisonLevel, [...rootOnLevel, task]);
@@ -34,5 +35,7 @@ export const getChildsAndRoots = (
     childRes.set(comparisonLevel, parentsByLevel);
   });
 
+  //console.log('childRes :>> ', childRes);
+  //console.log('rootRes :>> ', rootRes);
   return [childRes, rootRes];
 };

@@ -1,4 +1,4 @@
-import { TaskToRowIndexMap, Task } from "../types/public-types";
+import { Task, TaskToRowIndexMap } from "../types/public-types";
 
 export const getTaskRowIndex = (
   task: Task,
@@ -8,6 +8,8 @@ export const getTaskRowIndex = (
     id,
     comparisonLevel = 1,
   } = task;
+
+  console.log('getTaskRowIndex :>> ', task);
 
   const rowIndexByLevel = taskToRowIndexMap.get(comparisonLevel);
 

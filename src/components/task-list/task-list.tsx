@@ -19,9 +19,9 @@ import {
 
 import { useOptimizedList } from "../../helpers/use-optimized-list";
 
-import styles from "./task-list.module.css";
 import { useTableListResize } from "../gantt/use-tablelist-resize";
 import { TaskListHeaderActionsProps } from "./TaskListHeaderActions";
+import styles from "./task-list.module.css";
 
 // const SCROLL_DELAY = 25;
 
@@ -29,11 +29,13 @@ export type TaskListProps = {
   canMoveTasks: boolean;
   canResizeColumns: boolean;
   childTasksMap: ChildByLevelMap;
+  enableTaskGrouping: boolean;
   colors: ColorStyles;
   columnsProp: readonly Column[];
   cutIdsMirror: Readonly<Record<string, true>>;
   dateSetup: DateSetup;
   dependencyMap: DependencyMap;
+  nableTaskGrouping?: boolean;
   distances: Distances;
   fontFamily: string;
   fontSize: string;
@@ -74,6 +76,7 @@ const TaskListInner: React.FC<TaskListProps & TaskListHeaderActionsProps> = (
   {
     canMoveTasks,
     canResizeColumns,
+    enableTaskGrouping,
     childTasksMap,
     colors,
     columnsProp,
@@ -172,6 +175,7 @@ const TaskListInner: React.FC<TaskListProps & TaskListHeaderActionsProps> = (
               colors={colors}
               columns={columns}
               cutIdsMirror={cutIdsMirror}
+              enableTaskGrouping={enableTaskGrouping}
               dateSetup={dateSetup}
               dependencyMap={dependencyMap}
               distances={distances}

@@ -29,14 +29,13 @@ export const changeStartAndEndDescendants = ({
   const mapTaskToGlobalIndexAtLevel = mapTaskToGlobalIndex.get(
     changedTask.comparisonLevel || 1
   );
-  console.log("mapTaskToGlobalIndexAtLevel", mapTaskToGlobalIndexAtLevel);
 
   if (!mapTaskToGlobalIndexAtLevel) {
     throw new Error("Tasks are not found in the current level");
   }
 
   return descendants.reduce<OnDateChangeSuggestionType[]>((res, task) => {
-    if (task.type === "empty") {
+    if (task.type === "empty" || task.type === "user") {
       return res;
     }
 

@@ -14,7 +14,7 @@ export const DateEndColumn: React.FC<ColumnProps> = ({
     task,
   },
 }) => {
-  if (task.type === "empty") {
+  if (task.type === "empty" || task.type === "user") {
     return null
   }
 

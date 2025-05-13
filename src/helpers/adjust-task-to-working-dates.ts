@@ -95,10 +95,10 @@ export const adjustTaskToWorkingDates = ({
                 moveStartDelta > 0
                   ? getNextWorkingDate(changedTask.start, action, "startOfTask")
                   : getPreviousWorkingDate(
-                      changedTask.start,
-                      action,
-                      "startOfTask"
-                    ),
+                    changedTask.start,
+                    action,
+                    "startOfTask"
+                  ),
             };
           }
 

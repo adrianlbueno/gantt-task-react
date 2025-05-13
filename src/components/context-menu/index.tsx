@@ -4,11 +4,11 @@ import type { ReactElement } from "react";
 
 import { autoUpdate, flip, shift } from "@floating-ui/dom";
 import {
+  useDismiss,
   useFloating,
   useFocus,
-  useDismiss,
-  useRole,
   useInteractions,
+  useRole,
 } from "@floating-ui/react";
 
 // import { useOutsideClick } from 'use-dom-outside-click';
@@ -23,8 +23,8 @@ import type {
   TaskOrEmpty,
 } from "../../types/public-types";
 
-import { MenuOption } from "./menu-option";
 import React from "react";
+import { MenuOption } from "./menu-option";
 
 type ContextMenuProps = {
   checkHasCopyTasks: () => boolean;

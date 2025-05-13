@@ -9,7 +9,7 @@ export const AddColumn: React.FC<ColumnProps> = (props) => {
     data: { handleAddTask, icons, colors, task }
   } = props;
   const onClick = useCallback(() => {
-    if (task.type === "empty") {
+    if (task.type === "empty" || task.type === "user") {
       return;
     }
 

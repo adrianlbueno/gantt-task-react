@@ -34,7 +34,7 @@ export const collectParents = (
 
     const parentTask = tasksByLevel.get(parent);
 
-    if (!parentTask || parentTask.type === "empty" || !parentTask.isDisabled) {
+    if (!parentTask || parentTask.type === "empty" || !parentTask.isDisabled || parentTask.type === "user") {
       return res;
     }
 

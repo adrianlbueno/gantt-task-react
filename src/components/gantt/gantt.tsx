@@ -2,6 +2,24 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from "react"
 
 import enDateLocale from "date-fns/locale/en-US";
 
+import { collectVisibleTasks } from "../../helpers/collect-visible-tasks";
+import { ganttDateRange } from "../../helpers/date-helper";
+import { getChildOutOfParentWarnings } from "../../helpers/get-child-out-of-parent-warnings";
+import { getChildsAndRoots } from "../../helpers/get-childs-and-roots";
+import { getCriticalPath } from "../../helpers/get-critical-path";
+import { getDependencyMapAndWarnings } from "../../helpers/get-dependency-map-and-warnings";
+import {
+  countTaskCoordinatesWithGrouping,
+  countTaskCoordinates as defaultCountTaskCoordinates,
+  getMapTaskToCoordinates
+} from "../../helpers/get-map-task-to-coordinates";
+import { getMapTaskToGlobalIndex } from "../../helpers/get-map-task-to-global-index";
+import { getMapTaskToNestedIndex } from "../../helpers/get-map-task-to-nested-index";
+import { getMapTaskToRowIndex } from "../../helpers/get-map-task-to-row-index";
+import { getTaskCoordinates as getTaskCoordinatesDefault } from "../../helpers/get-task-coordinates";
+import { getTaskToHasDependencyWarningMap } from "../../helpers/get-task-to-has-dependency-warning-map";
+import { getTasksMap } from "../../helpers/get-tasks-map";
+import { sortTasks } from "../../helpers/sort-tasks";
 import {
   BarMoveAction,
   ChangeAction,
@@ -23,61 +41,45 @@ import {
   TaskOrEmpty,
   ViewMode
 } from "../../types/public-types";
-import { GridProps } from "../grid/grid";
-import { ganttDateRange } from "../../helpers/date-helper";
 import { CalendarProps } from "../calendar/calendar";
-import { TaskGanttContentProps } from "./task-gantt-content";
-import { TaskListHeaderDefault } from "../task-list/task-list-header";
-import { TaskListTableDefault } from "../task-list/task-list-table";
+import { GridProps } from "../grid/grid";
 import { StandardTooltipContent, Tooltip } from "../other/tooltip";
 import { TaskList, TaskListProps } from "../task-list/task-list";
+import { TaskListHeaderDefault } from "../task-list/task-list-header";
+import { TaskListTableDefault } from "../task-list/task-list-table";
 import { TaskGantt } from "./task-gantt";
-import { sortTasksByOrderThenDate } from "../../helpers/sort-tasks";
-import { getChildsAndRoots } from "../../helpers/get-childs-and-roots";
-import { getTaskCoordinates as getTaskCoordinatesDefault } from "../../helpers/get-task-coordinates";
-import { getTasksMap } from "../../helpers/get-tasks-map";
-import { getMapTaskToGlobalIndex } from "../../helpers/get-map-task-to-global-index";
-import { getMapTaskToRowIndex } from "../../helpers/get-map-task-to-row-index";
-import { getChildOutOfParentWarnings } from "../../helpers/get-child-out-of-parent-warnings";
-import { getDependencyMapAndWarnings } from "../../helpers/get-dependency-map-and-warnings";
-import {
-  countTaskCoordinates as defaultCountTaskCoordinates,
-  getMapTaskToCoordinates
-} from "../../helpers/get-map-task-to-coordinates";
-import { getCriticalPath } from "../../helpers/get-critical-path";
-import { getMapTaskToNestedIndex } from "../../helpers/get-map-task-to-nested-index";
-import { collectVisibleTasks } from "../../helpers/collect-visible-tasks";
-import { getTaskToHasDependencyWarningMap } from "../../helpers/get-task-to-has-dependency-warning-map";
+import { TaskGanttContentProps } from "./task-gantt-content";
 
 import { getChangeTaskMetadata } from "../../helpers/get-change-task-metadata";
+import { useTaskTooltip } from "../../helpers/use-task-tooltip";
 import { useCreateRelation } from "./use-create-relation";
 import { useTaskDrag } from "./use-task-drag";
-import { useTaskTooltip } from "../../helpers/use-task-tooltip";
 
 import { useOptimizedList } from "../../helpers/use-optimized-list";
-import { useVerticalScrollbars } from "./use-vertical-scrollbars";
 import { useHorizontalScrollbars } from "./use-horizontal-scrollbars";
+import { useVerticalScrollbars } from "./use-vertical-scrollbars";
 
 import { getDateByOffset } from "../../helpers/get-date-by-offset";
 import { getDatesDiff } from "../../helpers/get-dates-diff";
-import { useGetTaskCurrentState } from "./use-get-task-current-state";
-import { useSelection } from "./use-selection";
 import { defaultCheckIsHoliday } from "./default-check-is-holiday";
 import { defaultRoundDate } from "./default-round-date";
+import { useGetTaskCurrentState } from "./use-get-task-current-state";
+import { useSelection } from "./use-selection";
 
-import { useContextMenu } from "./use-context-menu";
 import { ContextMenu } from "../context-menu";
-import { useHandleAction } from "./use-handle-action";
 import { defaultGetCopiedTaskId } from "./default-get-copied-task-id";
+import { useContextMenu } from "./use-context-menu";
+import { useHandleAction } from "./use-handle-action";
 
-import { copyTasks } from "../../helpers/copy-tasks";
 import { copyOption } from "../../context-menu-options/copy";
 import { cutOption } from "../../context-menu-options/cut";
-import { pasteOption } from "../../context-menu-options/paste";
 import { deleteOption } from "../../context-menu-options/delete";
+import { pasteOption } from "../../context-menu-options/paste";
+import { copyTasks } from "../../helpers/copy-tasks";
 
 import { useHolidays } from "./use-holidays";
 
+import { getMapTaskToRowIndexWithGrouping } from "../../helpers/get-map-task-to-row-index-with-grouping";
 import styles from "./gantt.module.css";
 
 const defaultColors: ColorStyles = {
@@ -139,12 +141,12 @@ const defaultDistances: Distances = {
   arrowIndent: 20,
   barCornerRadius: 3,
   barFill: 60,
+  columnWidth: 60,
   contextMenuIconWidth: 20,
   contextMenuOptionHeight: 25,
   contextMenuSidePadding: 10,
   dateCellWidth: 220,
   dependenciesCellWidth: 120,
-  columnWidth: 50,
   dependencyFixHeight: 20,
   dependencyFixIndent: 50,
   dependencyFixWidth: 20,
@@ -163,73 +165,74 @@ const defaultDistances: Distances = {
 const MINIMUM_DISPLAYED_TIME_UNIT = 30;
 
 export const Gantt: React.FC<GanttProps> = ({
-                                              TaskListHeader = TaskListHeaderDefault,
-                                              TaskListTable = TaskListTableDefault,
-                                              TooltipContent = StandardTooltipContent,
-                                              ContextualPalette,
-                                              TaskDependencyContextualPalette,
-                                              authorizedRelations = [
-                                                "startToStart",
-                                                "startToEnd",
-                                                "endToStart",
-                                                "endToEnd"
-                                              ],
-                                              canMoveTasks = true,
-                                              canResizeColumns = true,
-                                              checkIsHoliday: checkIsHolidayProp = defaultCheckIsHoliday,
-                                              colors = defaultColors,
-                                              columns: columnsProp = undefined,
-                                              comparisonLevels = 1,
-                                              contextMenuOptions: contextMenuOptionsProp = undefined,
-                                              dateFormats: dateFormatsProp = undefined,
-                                              dateLocale = enDateLocale,
-                                              distances: distancesProp = undefined,
-                                              enableTableListContextMenu = false,
-                                              fixEndPosition: fixEndPositionProp = undefined,
-                                              fixStartPosition: fixStartPositionProp = undefined,
-                                              fontFamily = "Arial, Roboto, Oxygen, Ubuntu, Cantarell, Fira Sans, Droid Sans, Helvetica Neue",
-                                              fontSize = "14px",
-                                              getCopiedTaskId = defaultGetCopiedTaskId,
-                                              icons = undefined,
-                                              isDeleteDependencyOnDoubleClick = true,
-                                              isMoveChildsWithParent = true,
-                                              isUpdateDisabledParentsOnChange = true,
-                                              isShowChildOutOfParentWarnings = false,
-                                              isShowCriticalPath = false,
-                                              isShowDependencyWarnings = false,
-                                              isShowTaskNumbers = true,
-                                              isUnknownDates = false,
-                                              isAdjustToWorkingDates = true,
-                                              onAddTask = undefined,
-                                              onAddTaskClick = undefined,
-                                              onArrowDoubleClick: onArrowDoubleClickProp = undefined,
-                                              onChangeExpandState = undefined,
-                                              onChangeTasks = undefined,
-                                              onClick = undefined,
-                                              onDateChange: onDateChangeProp = undefined,
-                                              onDelete = undefined,
-                                              onDoubleClick = undefined,
-                                              onEditTask = undefined,
-                                              onEditTaskClick = undefined,
-                                              onFixDependencyPosition: onFixDependencyPositionProp = undefined,
-                                              onMoveTaskBefore = undefined,
-                                              onMoveTaskAfter = undefined,
-                                              onMoveTaskInside = undefined,
-                                              onProgressChange: onProgressChangeProp = undefined,
-                                              onRelationChange: onRelationChangeProp = undefined,
-                                              onResizeColumn = undefined,
-                                              onWheel,
-                                              preStepsCount = 1,
-                                              renderBottomHeader = undefined,
-                                              renderTopHeader = undefined,
-                                              roundDate: roundDateProp = defaultRoundDate,
-                                              dateMoveStep = { value: 1, timeUnit: GanttDateRoundingTimeUnit.DAY },
-                                              rtl = false,
-                                              tasks,
-                                              timeStep = 300000,
-                                              viewDate,
-                                              viewMode = ViewMode.Day
-                                            }) => {
+  TaskListHeader = TaskListHeaderDefault,
+  TaskListTable = TaskListTableDefault,
+  TooltipContent = StandardTooltipContent,
+  ContextualPalette,
+  TaskDependencyContextualPalette,
+  authorizedRelations = [
+    "startToStart",
+    "startToEnd",
+    "endToStart",
+    "endToEnd"
+  ],
+  enableTaskGrouping = false,
+  canMoveTasks = true,
+  canResizeColumns = true,
+  checkIsHoliday: checkIsHolidayProp = defaultCheckIsHoliday,
+  colors = defaultColors,
+  columns: columnsProp = undefined,
+  comparisonLevels = 1,
+  contextMenuOptions: contextMenuOptionsProp = undefined,
+  dateFormats: dateFormatsProp = undefined,
+  dateLocale = enDateLocale,
+  distances: distancesProp = undefined,
+  enableTableListContextMenu = false,
+  fixEndPosition: fixEndPositionProp = undefined,
+  fixStartPosition: fixStartPositionProp = undefined,
+  fontFamily = "Arial, Roboto, Oxygen, Ubuntu, Cantarell, Fira Sans, Droid Sans, Helvetica Neue",
+  fontSize = "14px",
+  getCopiedTaskId = defaultGetCopiedTaskId,
+  icons = undefined,
+  isDeleteDependencyOnDoubleClick = true,
+  isMoveChildsWithParent = true,
+  isUpdateDisabledParentsOnChange = true,
+  isShowChildOutOfParentWarnings = false,
+  isShowCriticalPath = false,
+  isShowDependencyWarnings = false,
+  isShowTaskNumbers = true,
+  isUnknownDates = false,
+  isAdjustToWorkingDates = true,
+  onAddTask = undefined,
+  onAddTaskClick = undefined,
+  onArrowDoubleClick: onArrowDoubleClickProp = undefined,
+  onChangeExpandState = undefined,
+  onChangeTasks = undefined,
+  onClick = undefined,
+  onDateChange: onDateChangeProp = undefined,
+  onDelete = undefined,
+  onDoubleClick = undefined,
+  onEditTask = undefined,
+  onEditTaskClick = undefined,
+  onFixDependencyPosition: onFixDependencyPositionProp = undefined,
+  onMoveTaskBefore = undefined,
+  onMoveTaskAfter = undefined,
+  onMoveTaskInside = undefined,
+  onProgressChange: onProgressChangeProp = undefined,
+  onRelationChange: onRelationChangeProp = undefined,
+  onResizeColumn = undefined,
+  onWheel,
+  preStepsCount = 1,
+  renderBottomHeader = undefined,
+  renderTopHeader = undefined,
+  roundDate: roundDateProp = defaultRoundDate,
+  dateMoveStep = { value: 1, timeUnit: GanttDateRoundingTimeUnit.DAY },
+  rtl = false,
+  tasks,
+  timeStep = 300000,
+  viewDate,
+  viewMode = ViewMode.Day
+}) => {
   const ganttSVGRef = useRef<SVGSVGElement>(null);
   const wrapperRef = useRef<HTMLDivElement>(null);
   const taskListRef = useRef<HTMLDivElement>(null);
@@ -264,16 +267,11 @@ export const Gantt: React.FC<GanttProps> = ({
   );
 
   const [sortedTasks, setSortedTasks] = useState<TaskOrEmpty[]>(() =>
-    [...tasks].sort(sortTasksByOrderThenDate)
-      .sort((a, b) => {
-        if (a.parent && !b.parent) return 1;
-        if (!a.parent && b.parent) return -1;
-        return 0;
-      })
+    [...tasks].sort(sortTasks)
   );
 
   useEffect(() => {
-    setSortedTasks([...tasks].sort(sortTasksByOrderThenDate));
+    setSortedTasks([...tasks].sort(sortTasks));
   }, [tasks]);
 
   const [childTasksMap, rootTasksMap] = useMemo(
@@ -282,9 +280,11 @@ export const Gantt: React.FC<GanttProps> = ({
   );
 
   const [visibleTasks, visibleTasksMirror] = useMemo(
-    () => collectVisibleTasks(childTasksMap, rootTasksMap),
+    () => collectVisibleTasks(childTasksMap, rootTasksMap, enableTaskGrouping),
     [childTasksMap, rootTasksMap]
   );
+
+  console.log("Visible Task IDs:", visibleTasks.map(t => t.id));
 
   const tasksMap = useMemo(() => getTasksMap(tasks), [tasks]);
 
@@ -415,26 +415,12 @@ export const Gantt: React.FC<GanttProps> = ({
     [maxLevelLength, fullRowHeight]
   );
 
-  const groupedTasks = [...visibleTasks].sort((a, b) => {
-    const parentA = a.parent || a.id;
-    const parentB = b.parent || b.id;
-
-    if (parentA !== parentB) {
-      return parentA.localeCompare(parentB);
-    }
-
-    if (a.type === "empty" || b.type === "empty") {
-      return 0;
-    }
-
-    return a.start.getTime() - b.start.getTime();
-  });
-
-
-  const [taskToRowIndexMap, rowIndexToTaskMap, mapGlobalRowIndexToTask] =
+  const [taskToRowIndexMap, rowIndexToTaskMap, mapGlobalRowIndexToTask, rowIndexToTasksMap] =
     useMemo(
-      () => getMapTaskToRowIndex(groupedTasks, comparisonLevels),
-      [groupedTasks, comparisonLevels]
+      () => enableTaskGrouping
+        ? getMapTaskToRowIndexWithGrouping(visibleTasks, comparisonLevels, true)
+        : getMapTaskToRowIndex(visibleTasks, comparisonLevels),
+      [visibleTasks, comparisonLevels, enableTaskGrouping]
     );
 
   const {
@@ -504,8 +490,42 @@ export const Gantt: React.FC<GanttProps> = ({
   const svgClientWidth = renderedColumnIndexes && renderedColumnIndexes[4];
 
   const countTaskCoordinates = useCallback(
-    (task: Task) =>
-      defaultCountTaskCoordinates(
+    (task: Task) => {
+      if (enableTaskGrouping) {
+        const comparisonLevel = task.comparisonLevel ?? 1;
+        let sequentialOffset = 0;
+
+        const indexesAtLevel = taskToRowIndexMap.get(comparisonLevel);
+        const rowIndex = indexesAtLevel?.get(task.id);
+
+        if (typeof rowIndex === "number") {
+          const rowTasksAtLevel = rowIndexToTasksMap
+            .get(comparisonLevel)
+            ?.get(rowIndex) ?? [];
+
+          const indexInRow = rowTasksAtLevel.findIndex((t) => t.id === task.id);
+          if (indexInRow !== -1) {
+            sequentialOffset = indexInRow * (taskHeight + 2);
+          }
+        }
+
+        return countTaskCoordinatesWithGrouping(
+          task,
+          taskToRowIndexMap,
+          startDate,
+          viewMode,
+          rtl,
+          fullRowHeight,
+          taskHeight,
+          taskYOffset,
+          distances,
+          svgWidth,
+          sequentialOffset
+        );
+      }
+
+      // fallback to default coordinate logic
+      return defaultCountTaskCoordinates(
         task,
         taskToRowIndexMap,
         startDate,
@@ -516,8 +536,11 @@ export const Gantt: React.FC<GanttProps> = ({
         taskYOffset,
         distances,
         svgWidth
-      ),
+      );
+    },
     [
+      enableTaskGrouping,
+      childTasksMap,
       taskToRowIndexMap,
       startDate,
       viewMode,
@@ -718,7 +741,9 @@ export const Gantt: React.FC<GanttProps> = ({
 
   const handleExpanderClick = useCallback(
     (clickedTask: Task) => {
-      // delegate the behavior
+      console.log(`Task ${clickedTask.id} hideChildren changed from ${clickedTask.hideChildren} to ${!clickedTask.hideChildren}`);
+      console.log('Task types:', tasks.map(task => `${task.id}: ${task.type}`));
+
       if (onChangeExpandState) {
         onChangeExpandState({
           ...clickedTask,
@@ -1719,7 +1744,7 @@ export const Gantt: React.FC<GanttProps> = ({
 
     const resTask = tasksMapOnLevel.get(id);
 
-    if (!resTask || resTask.type === "empty") {
+    if (!resTask || resTask.type === "empty" || resTask.type === "user") {
       return null;
     }
 
@@ -1735,7 +1760,7 @@ export const Gantt: React.FC<GanttProps> = ({
   );
 
   const [defaultStartColumnIndex, defaultEndColumnIndex] =
-  renderedColumnIndexes || [0, -1];
+    renderedColumnIndexes || [0, -1];
 
   const startColumnIndex = defaultStartColumnIndex - additionalStartColumns;
   const endColumnIndex = defaultEndColumnIndex - additionalStartColumns + 1;
@@ -1905,6 +1930,7 @@ export const Gantt: React.FC<GanttProps> = ({
   const tableProps: TaskListProps = {
     TaskListHeader,
     TaskListTable,
+    enableTaskGrouping,
     canMoveTasks,
     canResizeColumns,
     childTasksMap,

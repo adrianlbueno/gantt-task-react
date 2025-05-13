@@ -1,5 +1,5 @@
-import { useCallback, useEffect, useState } from "react";
 import type { RefObject } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 import { checkIsDescendant } from "../../helpers/check-is-descendant";
 import { getRelationCircleByCoordinates } from "../../helpers/get-relation-circle-by-coordinates";
@@ -9,14 +9,14 @@ import {
 } from "../../helpers/get-task-coordinates";
 import { GanttRelationEvent } from "../../types/gantt-task-actions";
 import {
+  DateExtremity,
   Distances,
   MapTaskToCoordinates,
-  TaskToGlobalIndexMap,
   OnRelationChange,
   Task,
   TaskMapByLevel,
   TaskOrEmpty,
-  DateExtremity,
+  TaskToGlobalIndexMap,
 } from "../../types/public-types";
 
 type UseCreateRelationParams = {
@@ -43,9 +43,9 @@ export const useCreateRelation = ({
   tasksMap,
   visibleTasks,
 }: UseCreateRelationParams): [
-  GanttRelationEvent | null,
-  (extremity: DateExtremity, task: Task) => void
-] => {
+    GanttRelationEvent | null,
+    (extremity: DateExtremity, task: Task) => void
+  ] => {
   const [ganttRelationEvent, setGanttRelationEvent] =
     useState<GanttRelationEvent | null>(null);
 

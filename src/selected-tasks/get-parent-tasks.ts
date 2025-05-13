@@ -1,4 +1,5 @@
 import { checkIsDescendant } from "../helpers/check-is-descendant";
+import { isRealTask } from "../helpers/check-is-real-task";
 
 import type {
   TaskMapByLevel,
@@ -16,8 +17,8 @@ export const getParentTasks = (
       if (maybeParent === maybeDescendant || maybeParent.type === 'empty') {
         return false;
       }
-
-      return checkIsDescendant(maybeParent, maybeDescendant, tasksMap);
+      return isRealTask(maybeParent) &&
+        checkIsDescendant(maybeParent, maybeDescendant, tasksMap);
     });
 
     if (!isDescendant) {

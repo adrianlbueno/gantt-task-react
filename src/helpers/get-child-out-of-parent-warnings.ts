@@ -1,9 +1,9 @@
 import {
+  ChildByLevelMap,
+  ChildOutOfParentWarnings,
+  Task,
   TaskOrEmpty,
   TaskOutOfParentWarnings,
-  ChildOutOfParentWarnings,
-  ChildByLevelMap,
-  Task,
 } from "../types/public-types";
 import { compareDates } from "./compare-dates";
 
@@ -14,7 +14,7 @@ export const getChildOutOfParentWarnings = (
   const res = new Map<number, Map<string, TaskOutOfParentWarnings>>();
 
   tasks.forEach((task) => {
-    if (task.type === 'empty') {
+    if (task.type === 'empty' || task.type === "user") {
       return;
     }
 

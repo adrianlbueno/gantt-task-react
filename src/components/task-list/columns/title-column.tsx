@@ -2,6 +2,7 @@ import React, { useCallback } from "react";
 
 import { ColumnProps, Icons, TaskOrEmpty } from "../../../types/public-types";
 
+import { isRealTask } from "../../../helpers/check-is-real-task";
 import styles from "./title-column.module.css";
 
 const getExpanderSymbol = (
@@ -43,7 +44,7 @@ export const TitleColumn: React.FC<ColumnProps> = (props) => {
   const title = isShowTaskNumbers ? `${indexStr} ${name}` : name;
 
   const onClick = useCallback(() => {
-    if (task.type !== "empty") {
+    if (isRealTask(task)) {
       onExpanderClick(task);
     }
   }, [onExpanderClick, task]);
@@ -58,9 +59,8 @@ export const TitleColumn: React.FC<ColumnProps> = (props) => {
       title={title}
     >
       <div
-        className={`${styles.taskListExpander} ${
-          !hasChildren ? styles.taskListEmptyExpander : ""
-        }`}
+        className={`${styles.taskListExpander} ${!hasChildren ? styles.taskListEmptyExpander : ""
+          }`}
         onClick={onClick}
         style={{
           width: expandIconWidth,

@@ -1,24 +1,26 @@
-import React, { memo, SyntheticEvent, useMemo } from "react";
 import type { CSSProperties, RefObject } from "react";
+import React, { SyntheticEvent, memo, useMemo } from "react";
 
-import { GridProps, Grid } from "../grid/grid";
-import { CalendarProps, Calendar } from "../calendar/calendar";
-import { TaskGanttContentProps, TaskGanttContent } from "./task-gantt-content";
-import styles from "./gantt.module.css";
-import Popper from "@mui/material/Popper";
-import Paper from "@mui/material/Paper";
-import {
-  TaskContextualPaletteProps,
-  Task,
-  Distances,
-  DateExtremity,
-  TaskDependencyContextualPaletteProps, ColorStyles
-} from "../../types/public-types";
 import ClickAwayListener from "@mui/material/ClickAwayListener";
+import Paper from "@mui/material/Paper";
+import Popper from "@mui/material/Popper";
+import {
+  ColorStyles,
+  DateExtremity,
+  Distances,
+  Task,
+  TaskContextualPaletteProps,
+  TaskDependencyContextualPaletteProps
+} from "../../types/public-types";
+import { Calendar, CalendarProps } from "../calendar/calendar";
+import { Grid, GridProps } from "../grid/grid";
+import styles from "./gantt.module.css";
+import { TaskGanttContent, TaskGanttContentProps } from "./task-gantt-content";
 
 export type TaskGanttProps = {
   barProps: TaskGanttContentProps;
   calendarProps: CalendarProps;
+  enableTaskGrouping?: boolean; //new prop for anabling/disabling grouping mode
   gridProps: GridProps;
   distances: Distances;
   fullRowHeight: number;
@@ -57,7 +59,7 @@ const TaskGanttInner: React.FC<TaskGanttProps> = (props) => {
     height: Math.max(ganttFullHeight, minimumRowDisplayed * rowHeight),
     width: ganttTaskRootRef?.current
       ? ganttTaskRootRef.current.clientWidth +
-        ganttTaskRootRef.current.scrollLeft
+      ganttTaskRootRef.current.scrollLeft
       : fullSvgWidth,
   };
 

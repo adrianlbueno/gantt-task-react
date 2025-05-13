@@ -2,21 +2,21 @@ import React, { useCallback, useState } from "react";
 
 import { Gantt, OnChangeTasks, Task, TaskOrEmpty } from "../src";
 
-import { initTasks, onAddTask, onEditTask } from "./helper";
+import { initTasksUser, onAddTask, onEditTask } from "./helper";
 
 import "../dist/style.css";
 
 export const Comparison: React.FC = props => {
   const [tasks, setTasks] = useState<readonly TaskOrEmpty[]>(() => {
-    const firstLevelTasks = initTasks();
+    const firstLevelTasks = initTasksUser();
 
-    const secondLevelTasks = firstLevelTasks.map(
+     firstLevelTasks.map(
       (task) => ({
         ...task,
         comparisonLevel: 2
       } as TaskOrEmpty));
 
-    return [...firstLevelTasks, ...secondLevelTasks];
+    return [...firstLevelTasks];
   });
 
   const onChangeTasks = useCallback<OnChangeTasks>((nextTasks, action) => {
@@ -55,6 +55,7 @@ export const Comparison: React.FC = props => {
     <Gantt
       comparisonLevels={2}
       {...props}
+      enableTaskGrouping={true}
       onAddTask={onAddTask}
       onChangeTasks={onChangeTasks}
       onDoubleClick={handleDblClick}
