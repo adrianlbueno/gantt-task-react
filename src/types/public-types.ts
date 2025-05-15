@@ -189,7 +189,7 @@ export interface EmptyTask {
   name: string;
   parent?: string;
   comparisonLevel?: number;
-  status: string;
+  status?: string;
   displayOrder?: number;
   isDisabled?: boolean;
   styles?: Partial<ColorStyles>;
