@@ -180,6 +180,7 @@ export interface Task {
   hideChildren?: boolean;
   displayOrder?: number;
   comparisonLevel?: number;
+  status?: string;
 }
 
 export interface EmptyTask {
@@ -188,6 +189,7 @@ export interface EmptyTask {
   name: string;
   parent?: string;
   comparisonLevel?: number;
+  status: string;
   displayOrder?: number;
   isDisabled?: boolean;
   styles?: Partial<ColorStyles>;

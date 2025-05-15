@@ -1,9 +1,9 @@
 {
-  "name": "@wamra/gantt-task-react",
-  "version": "0.6.17",
-  "description": "Interactive Gantt Chart for React with TypeScript",
-  "author": "WAMRA <wamra@users.noreply.github.com>",
-  "homepage": "https://github.com/wamra/gantt-task-react/blob/main/README.md#gantt-task-react",
+  "name": "@thepocman/gantt-task-react",
+  "version": "1.0.1",
+  "description": "Fork of gantt-task-react with support for grouped tasks on a single row when collapsed",
+  "author": "Adrian Bueno <adrianlbueno@users.noreply.github.com>",
+  "homepage": "https://github.com/adrianlbueno/gantt-task-react#readme",
   "license": "MIT",
   "contributors": [
     {
@@ -13,14 +13,18 @@
     {
       "name": "Janlaywss",
       "url": "https://github.com/Janlaywss"
+    },
+    {
+      "name": "Adrian Bueno",
+      "url": "https://github.com/adrianlbueno"
     }
   ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/wamra/gantt-task-react.git"
+    "url": "git+https://github.com/adrianlbueno/gantt-task-react.git"
   },
   "publishConfig": {
-    "registry": "https://registry.npmjs.org/"
+    "access": "public"
   },
   "main": "./dist/gantt-task-react.umd.js",
   "module": "./dist/gantt-task-react.es.js",
