@@ -160,6 +160,7 @@ export type TaskType = "task" | "milestone" | "project";
 
 export interface Task {
   id: string;
+  taskId?: string;
   type: TaskType;
   name: string;
   start: Date;
@@ -185,6 +186,7 @@ export interface Task {
 
 export interface EmptyTask {
   id: string;
+  taskId?: string;
   type: "empty";
   name: string;
   parent?: string;
