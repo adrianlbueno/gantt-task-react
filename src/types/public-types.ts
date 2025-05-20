@@ -156,7 +156,7 @@ export interface Distances {
   titleCellWidth: number;
 }
 
-export type TaskType = "task" | "milestone" | "project";
+export type TaskType = "task" | "milestone" | "project" | "vacation" ;
 
 export interface Task {
   id: string;

@@ -28,6 +28,18 @@ export function initTasksUser(): TaskOrEmpty[] {
       parent: "user-1",
     },
     {
+      id: "vacation-1-2",
+      type: "vacation",
+      name: "Vacation 1",
+      start: new Date(currentDate.getFullYear(), currentDate.getMonth(), 8),
+      end: new Date(currentDate.getFullYear(), currentDate.getMonth(), 12),
+      progress: 0,
+      styles: {
+        barBackgroundColor: "#808080",
+      },
+      parent: "user-1",
+    },
+    {
       id: "audit-2",
       type: "task",
       name: "Audit 2 last in the list",
