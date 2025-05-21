@@ -26,6 +26,7 @@ export function initTasksUser(): TaskOrEmpty[] {
       end: new Date(currentDate.getFullYear(), currentDate.getMonth(), 12),
       progress: 50,
       parent: "user-1",
+      comparisonLevel:1
     },
     {
       id: "vacation-1-2",
@@ -38,6 +39,7 @@ export function initTasksUser(): TaskOrEmpty[] {
         barBackgroundColor: "#808080",
       },
       parent: "user-1",
+      comparisonLevel:2
     },
     {
       id: "audit-2",
