@@ -23,7 +23,7 @@ import {
   TaskCoordinates,
   TaskDependencyContextualPaletteProps,
   TaskOrEmpty,
-  TaskToHasDependencyWarningMap,
+  TaskToHasDependencyWarningMap, TaskToRowIndexMap,
 } from "../../types/public-types";
 import { Arrow } from "../other/arrow";
 import { RelationLine } from "../other/relation-line";
@@ -35,6 +35,7 @@ export type TaskGanttContentProps = {
   additionalRightSpace: number;
   childOutOfParentWarnings: ChildOutOfParentWarnings | null;
   childTasksMap: ChildByLevelMap;
+  taskToRowIndexMap: TaskToRowIndexMap;
   colorStyles: ColorStyles;
   comparisonLevels: number;
   criticalPaths: CriticalPaths | null;
@@ -124,6 +125,7 @@ export const TaskGanttContent: React.FC<TaskGanttContentProps> = ({
   taskHeight,
   taskHalfHeight,
   visibleTasksMirror,
+  taskToRowIndexMap,
 }) => {
   const [renderedTasks, renderedArrows, renderedSelectedTasks] = useMemo(() => {
     if (!renderedRowIndexes) {
@@ -145,7 +147,6 @@ export const TaskGanttContent: React.FC<TaskGanttContentProps> = ({
       string,
       Record<string, Record<string, true>>
     > = {};
-
     console.log("mapGlobalRowIndexToTask", mapGlobalRowIndexToTask);
 
 
@@ -161,16 +162,25 @@ export const TaskGanttContent: React.FC<TaskGanttContentProps> = ({
       if (selectedIdsMirror[taskId] && !addedSelectedTasks[taskId]) {
         addedSelectedTasks[taskId] = true;
 
-        selectedTasksRes.push(
-          <rect
-            x={0}
-            y={Math.floor(index / comparisonLevels) * fullRowHeight}
-            width="100%"
-            height={fullRowHeight}
-            fill={colorStyles.selectedTaskBackgroundColor}
-            key={taskId}
-          />
-        );
+        const rowIndex =
+          taskToRowIndexMap
+            .get(comparisonLevel)
+            ?.get(taskId);
+
+        if (typeof rowIndex === "number") {
+          const y = rowIndex * fullRowHeight;
+
+          selectedTasksRes.push(
+            <rect
+              x={0}
+              y={y}
+              width="100%"
+              height={fullRowHeight}
+              fill={colorStyles.selectedTaskBackgroundColor}
+              key={`selected-${taskId}`}
+            />
+          );
+        }
       }
 
       if (comparisonLevel > comparisonLevels) {

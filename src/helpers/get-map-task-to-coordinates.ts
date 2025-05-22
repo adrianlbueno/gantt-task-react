@@ -141,6 +141,7 @@ export const getMapTaskToCoordinates = (
   return res;
 };
 
+
 export const countTaskCoordinatesWithGrouping = (
   task: Task,
   taskToRowIndexMap: TaskToRowIndexMap,
@@ -156,7 +157,6 @@ export const countTaskCoordinatesWithGrouping = (
 ): TaskCoordinates => {
   const { columnWidth, rowHeight } = distances;
   const { id, comparisonLevel = 1, progress, type } = task;
-
   const indexesAtLevel = taskToRowIndexMap.get(comparisonLevel);
   if (!indexesAtLevel) {
     throw new Error(`Indexes at level ${comparisonLevel} are not found`);

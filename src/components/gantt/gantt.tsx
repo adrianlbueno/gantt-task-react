@@ -284,8 +284,6 @@ export const Gantt: React.FC<GanttProps> = ({
     [childTasksMap, rootTasksMap]
   );
 
-  console.log("Visible Task IDs:", visibleTasks.map(t => t.id));
-
   const tasksMap = useMemo(() => getTasksMap(tasks), [tasks]);
 
   const checkTaskIdExists = useCallback<CheckTaskIdExistsAtLevel>(
@@ -383,12 +381,31 @@ export const Gantt: React.FC<GanttProps> = ({
     [distances, taskHeight]
   );
 
+  const [taskToRowIndexMap, rowIndexToTaskMap, mapGlobalRowIndexToTask, rowIndexToTasksMap] =
+    useMemo(
+      () => enableTaskGrouping
+        ? getMapTaskToRowIndexWithGrouping(visibleTasks, comparisonLevels, true)
+        : getMapTaskToRowIndex(visibleTasks, comparisonLevels),
+      [visibleTasks, comparisonLevels, enableTaskGrouping]
+    );
+
   const taskHalfHeight = useMemo(
     () => Math.round(taskHeight / 2),
     [taskHeight]
   );
 
+  console.log("rowIndexToTasksMap ------",rowIndexToTasksMap)
+
   const maxLevelLength = useMemo(() => {
+    if (enableTaskGrouping) {
+      let totalRows = 0;
+      for (const [, rowMap] of rowIndexToTasksMap ?? new Map()) {
+        totalRows += rowMap.size;
+      }
+      
+      return Math.max(totalRows, 1);
+    }
+
     let maxLength = 0;
     const countByLevel: Record<string, number> = {};
 
@@ -407,21 +424,18 @@ export const Gantt: React.FC<GanttProps> = ({
       }
     });
 
+    console.log("📦 Tasks per level:", countByLevel);
+    console.log("📏 maxLevelLength:", maxLength);
+
     return maxLength;
-  }, [visibleTasks, comparisonLevels]);
+  }, [visibleTasks, comparisonLevels, enableTaskGrouping, rowIndexToTasksMap]);
+
 
   const ganttFullHeight = useMemo(
     () => maxLevelLength * fullRowHeight,
     [maxLevelLength, fullRowHeight]
   );
 
-  const [taskToRowIndexMap, rowIndexToTaskMap, mapGlobalRowIndexToTask, rowIndexToTasksMap] =
-    useMemo(
-      () => enableTaskGrouping
-        ? getMapTaskToRowIndexWithGrouping(visibleTasks, comparisonLevels, true)
-        : getMapTaskToRowIndex(visibleTasks, comparisonLevels),
-      [visibleTasks, comparisonLevels, enableTaskGrouping]
-    );
 
   const {
     checkHasCopyTasks,
