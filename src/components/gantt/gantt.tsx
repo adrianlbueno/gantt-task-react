@@ -396,17 +396,7 @@ export const Gantt: React.FC<GanttProps> = ({
 
   const maxLevelLength = useMemo(() => {
     if (enableTaskGrouping) {
-      let totalHeightInRows = 0;
-
-      for (const [_, rowMap] of rowIndexToTasksMap) {
-        for (const [_, tasksInRow] of rowMap) {
-          const maxStack = tasksInRow.length;
-          const stackedHeight = maxStack * (taskHeight + 2); // adjust +2 if needed
-          const rowsNeeded = Math.ceil(stackedHeight / fullRowHeight);
-          totalHeightInRows += rowsNeeded;
-        }
-      }
-      return Math.max(totalHeightInRows, 1);
+      return Math.max(rowIndexToTasksMap?.size ?? 0, 1); // Ensure at least 1
     }
 
     let maxLength = 0;
@@ -428,25 +418,24 @@ export const Gantt: React.FC<GanttProps> = ({
     });
 
     return maxLength;
-  }, [visibleTasks, comparisonLevels, enableTaskGrouping, rowIndexToTasksMap, fullRowHeight, taskHeight]);
-
+  }, [visibleTasks, comparisonLevels, enableTaskGrouping, rowIndexToTasksMap]);
 
   const ganttFullHeight = useMemo(() => {
     if (enableTaskGrouping) {
       let totalHeight = 0;
+
       for (const [, taskMap] of rowIndexToTasksMap) {
         for (const [, tasks] of taskMap) {
-          const stackedHeight = tasks.length * (taskHeight + 2); // same as sequentialOffset logic
-          totalHeight += Math.max(stackedHeight, fullRowHeight); // ensure at least one row
+          const rowHeight = tasks.length * (taskHeight + 2); // actual stacked height
+          totalHeight += Math.max(rowHeight, fullRowHeight); // ensure minimum row height
         }
       }
-      return totalHeight;
+
+      return Math.max(totalHeight, fullRowHeight);
     }
 
     return maxLevelLength * fullRowHeight;
   }, [enableTaskGrouping, rowIndexToTasksMap, maxLevelLength, fullRowHeight, taskHeight]);
-
-
 
   const {
     checkHasCopyTasks,
@@ -766,6 +755,9 @@ export const Gantt: React.FC<GanttProps> = ({
 
   const handleExpanderClick = useCallback(
     (clickedTask: Task) => {
+      console.log(`Task ${clickedTask.id} hideChildren changed from ${clickedTask.hideChildren} to ${!clickedTask.hideChildren}`);
+      console.log('Task types:', tasks.map(task => `${task.id}: ${task.type}`));
+
       if (onChangeExpandState) {
         onChangeExpandState({
           ...clickedTask,

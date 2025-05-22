@@ -187,10 +187,85 @@ export function initTasksUser(): TaskOrEmpty[] {
       parent: "user-4",
       hideChildren: false
     },
+    {
+      id: "user-5",
+      type: "user",
+      name: "Xavier Testing",
+      hideChildren: true,
+    },
+    {
+      id: "Project-new-1-Puser-5",
+      type: "task",
+      name: "testing project 4",
+      start: new Date(currentDate.getFullYear(), currentDate.getMonth(), 17),
+      end: new Date(currentDate.getFullYear(), currentDate.getMonth(), 18),
+      progress: 70,
+      parent: "user-5",
+      hideChildren: false
+    },
+    {
+      id: "Project-new-1-Puser-5",
+      type: "task",
+      name: "testing project 5",
+      start: new Date(currentDate.getFullYear(), currentDate.getMonth(), 17),
+      end: new Date(currentDate.getFullYear(), currentDate.getMonth(), 18),
+      progress: 70,
+      parent: "user-5",
+      hideChildren: false
+    },
 
-
-
-
+    {
+      id: "user-6",
+      type: "user",
+      name: "Xavier Testing",
+      hideChildren: true,
+    },
+    {
+      id: "Project-new-1-Puser-6",
+      type: "task",
+      name: "testing project 4",
+      start: new Date(currentDate.getFullYear(), currentDate.getMonth(), 17),
+      end: new Date(currentDate.getFullYear(), currentDate.getMonth(), 18),
+      progress: 70,
+      parent: "user-6",
+      hideChildren: false
+    },
+    {
+      id: "Project-new-1-Puser-6",
+      type: "task",
+      name: "testing project 5",
+      start: new Date(currentDate.getFullYear(), currentDate.getMonth(), 17),
+      end: new Date(currentDate.getFullYear(), currentDate.getMonth(), 18),
+      progress: 70,
+      parent: "user-6",
+      hideChildren: false
+    },
+    {
+      id: "user-7",
+      type: "user",
+      name: "Xavier Testing",
+      hideChildren: true,
+    },
+    {
+      id: "Project-new-1-Puser-7",
+      type: "task",
+      name: "testing project 4",
+      start: new Date(currentDate.getFullYear(), currentDate.getMonth(), 17),
+      end: new Date(currentDate.getFullYear(), currentDate.getMonth(), 18),
+      progress: 70,
+      parent: "user-7",
+      hideChildren: false
+    },
+    {
+      id: "Project-new-1-Puser-7",
+      type: "task",
+      name: "testing project 5",
+      start: new Date(currentDate.getFullYear(), currentDate.getMonth(), 17),
+      end: new Date(currentDate.getFullYear(), currentDate.getMonth(), 18),
+      progress: 70,
+      parent: "user-7",
+      hideChildren: false
+    },
   ];
 
   return tasks.map(taskOrEmpty => {
