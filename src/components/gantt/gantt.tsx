@@ -433,17 +433,19 @@ export const Gantt: React.FC<GanttProps> = ({
 
   const ganttFullHeight = useMemo(() => {
     if (enableTaskGrouping) {
-      let totalRows = 0;
+      let totalHeight = 0;
       for (const [, taskMap] of rowIndexToTasksMap) {
         for (const [, tasks] of taskMap) {
-          totalRows += tasks.length;
+          const stackedHeight = tasks.length * (taskHeight + 2); // same as sequentialOffset logic
+          totalHeight += Math.max(stackedHeight, fullRowHeight); // ensure at least one row
         }
       }
-      return Math.max(totalRows, 1) * fullRowHeight;
+      return totalHeight;
     }
 
     return maxLevelLength * fullRowHeight;
-  }, [enableTaskGrouping, rowIndexToTasksMap, maxLevelLength, fullRowHeight]);
+  }, [enableTaskGrouping, rowIndexToTasksMap, maxLevelLength, fullRowHeight, taskHeight]);
+
 
 
   const {
