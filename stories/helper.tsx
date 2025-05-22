@@ -129,6 +129,66 @@ export function initTasksUser(): TaskOrEmpty[] {
       parent: "ProjectId",
       hideChildren: false
     },
+    {
+      id: "user-2",
+      type: "user",
+      name: "Pedro Bueno",
+      hideChildren: true,
+    },
+    {
+      id: "Project-new-1-Puser-2",
+      type: "task",
+      name: "testing project 5",
+      start: new Date(currentDate.getFullYear(), currentDate.getMonth(), 17),
+      end: new Date(currentDate.getFullYear(), currentDate.getMonth(), 18),
+      progress: 70,
+      parent: "user-2",
+      hideChildren: false
+    },
+    {
+      id: "user-3",
+      type: "user",
+      name: "Pedro Testing",
+      hideChildren: true,
+    },
+    {
+      id: "Project-new-1-Puser-3",
+      type: "task",
+      name: "testing project 3",
+      start: new Date(currentDate.getFullYear(), currentDate.getMonth(), 17),
+      end: new Date(currentDate.getFullYear(), currentDate.getMonth(), 18),
+      progress: 70,
+      parent: "user-3",
+      hideChildren: false
+    },
+    {
+      id: "user-4",
+      type: "user",
+      name: "Pedro Testing",
+      hideChildren: true,
+    },
+    {
+      id: "Project-new-1-Puser-4",
+      type: "task",
+      name: "testing project 4",
+      start: new Date(currentDate.getFullYear(), currentDate.getMonth(), 17),
+      end: new Date(currentDate.getFullYear(), currentDate.getMonth(), 18),
+      progress: 70,
+      parent: "user-4",
+      hideChildren: false
+    },
+    {
+      id: "Project-new-1-Puser-5",
+      type: "task",
+      name: "testing project 5",
+      start: new Date(currentDate.getFullYear(), currentDate.getMonth(), 17),
+      end: new Date(currentDate.getFullYear(), currentDate.getMonth(), 18),
+      progress: 70,
+      parent: "user-4",
+      hideChildren: false
+    },
+
+
 
 
   ];
