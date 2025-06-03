@@ -1,10 +1,10 @@
 import type { ReactNode } from "react";
 import React, { memo, useMemo, useState } from "react";
 
-import { checkHasChildren } from "../../helpers/check-has-children";
 import { Task, TaskListTableProps, TaskOrEmpty } from "../../types/public-types";
 import { TaskListTableRow } from "./task-list-table-row";
 
+import { checkHasChildren } from "../../helpers/check-has-children";
 import styles from "./task-list-table.module.css";
 
 const TaskListTableDefaultInner: React.FC<TaskListTableProps> = ({
@@ -31,6 +31,7 @@ const TaskListTableDefaultInner: React.FC<TaskListTableProps> = ({
   icons,
   isShowTaskNumbers,
   mapTaskToNestedIndex,
+  rowIndexToTasksMap,
   onClick,
   onExpanderClick,
   renderedIndexes,
@@ -41,14 +42,11 @@ const TaskListTableDefaultInner: React.FC<TaskListTableProps> = ({
 }) => {
 
   const renderedTasks = useMemo(() => {
-
-    console.log("enableTaskGrouping", enableTaskGrouping)
-
     if (!enableTaskGrouping) {
-      return tasks;
+      return tasks.filter((task) => !task.comparisonLevel || task.comparisonLevel === 1);
     }
 
-    // ✅ Grouping enabled: filter out children of collapsed users
+    // Grouping enabled: filter out children of collapsed users  
     return tasks.filter(task => {
       const parent = tasks.find(t => t.id === task.parent);
 
@@ -61,89 +59,131 @@ const TaskListTableDefaultInner: React.FC<TaskListTableProps> = ({
     });
   }, [tasks, enableTaskGrouping]);
 
-
   const [draggedTask, setDraggedTask] = useState<TaskOrEmpty>(null);
 
   const renderedListWithOffset = useMemo(() => {
-    if (!renderedIndexes) {
-      return null;
-    }
+    if (!renderedIndexes) return null;
 
     const [start, end] = renderedIndexes;
+    const renderList: ReactNode[] = [];
 
-    const renderedList: ReactNode[] = [];
+    if (!enableTaskGrouping) {
+      for (let rowIndex = start; rowIndex <= end; rowIndex++) {
+        const task = renderedTasks[rowIndex];
+        if (!task) break;
 
-    for (let index = start; index <= end; ++index) {
-      const task = renderedTasks[index];
+        const { id, comparisonLevel = 1 } = task;
+        const indexesOnLevel = mapTaskToNestedIndex.get(comparisonLevel);
+        const taskIndex = indexesOnLevel?.get(id);
+        const [depth, indexStr] = taskIndex ?? [0, ""];
 
-      if (!task) {
-        break;
+        renderList.push(
+          <TaskListTableRow
+            canMoveTasks={canMoveTasks}
+            colors={colors}
+            columns={columns}
+            dateSetup={dateSetup}
+            dependencyMap={dependencyMap}
+            depth={depth}
+            distances={distances}
+            fullRowHeight={fullRowHeight}
+            getTaskCurrentState={getTaskCurrentState}
+            handleAddTask={handleAddTask}
+            handleDeleteTasks={handleDeleteTasks}
+            handleEditTask={handleEditTask}
+            handleMoveTaskBefore={handleMoveTaskBefore}
+            handleMoveTaskAfter={handleMoveTaskAfter}
+            handleMoveTasksInside={handleMoveTasksInside}
+            handleOpenContextMenu={handleOpenContextMenu}
+            hasChildren={checkHasChildren(task, childTasksMap)}
+            icons={icons}
+            indexStr={indexStr}
+            isClosed={Boolean((task as Task)?.hideChildren)}
+            isCut={cutIdsMirror[id]}
+            isEven={rowIndex % 2 === 1}
+            isSelected={selectedIdsMirror[id]}
+            isShowTaskNumbers={isShowTaskNumbers}
+            onClick={onClick}
+            onExpanderClick={onExpanderClick}
+            scrollToTask={scrollToTask}
+            selectTaskOnMouseDown={selectTaskOnMouseDown}
+            task={task}
+            key={id}
+            tasks={tasks}
+            draggedTask={draggedTask}
+            setDraggedTask={setDraggedTask}
+          />
+        );
       }
+    } else {
+      for (let rowIndex = start; rowIndex <= end; rowIndex++) {
+        for (const [comparisonLevel, rowMap] of rowIndexToTasksMap.entries()) {
+          const taskList = rowMap.get(rowIndex);
+          if (!taskList) continue;
 
-      const { id, comparisonLevel = 1 } = task;
+          for (const task of taskList) {
+            const parent = tasks.find(t => t.id === task.parent);
+            const isGroupedChildOfCollapsedUser =
+              parent &&
+              parent.type === "user" &&
+              parent.hideChildren === true;
 
-      const indexesOnLevel = mapTaskToNestedIndex.get(comparisonLevel);
+            console.log('isGroupedChildOfCollapsedUser :>> ', isGroupedChildOfCollapsedUser);
 
-      if (!indexesOnLevel) {
-        throw new Error(`Indexes are not found for level ${comparisonLevel}`);
+            if (isGroupedChildOfCollapsedUser) {
+              continue;
+            }
+            const { id } = task;
+            const indexesOnLevel = mapTaskToNestedIndex.get(comparisonLevel);
+            const taskIndex = indexesOnLevel?.get(id);
+            const [depth, indexStr] = taskIndex ?? [0, ""];
+
+            renderList.push(
+              <TaskListTableRow
+                canMoveTasks={canMoveTasks}
+                colors={colors}
+                columns={columns}
+                dateSetup={dateSetup}
+                dependencyMap={dependencyMap}
+                depth={depth}
+                distances={distances}
+                fullRowHeight={fullRowHeight}
+                getTaskCurrentState={getTaskCurrentState}
+                handleAddTask={handleAddTask}
+                handleDeleteTasks={handleDeleteTasks}
+                handleEditTask={handleEditTask}
+                handleMoveTaskBefore={handleMoveTaskBefore}
+                handleMoveTaskAfter={handleMoveTaskAfter}
+                handleMoveTasksInside={handleMoveTasksInside}
+                handleOpenContextMenu={handleOpenContextMenu}
+                hasChildren={checkHasChildren(task, childTasksMap)}
+                icons={icons}
+                indexStr={indexStr}
+                isClosed={Boolean((task as Task)?.hideChildren)}
+                isCut={cutIdsMirror[id]}
+                isEven={rowIndex % 2 === 1}
+                isSelected={selectedIdsMirror[id]}
+                isShowTaskNumbers={isShowTaskNumbers}
+                onClick={onClick}
+                onExpanderClick={onExpanderClick}
+                scrollToTask={scrollToTask}
+                selectTaskOnMouseDown={selectTaskOnMouseDown}
+                task={task}
+                key={id}
+                tasks={tasks}
+                draggedTask={draggedTask}
+                setDraggedTask={setDraggedTask}
+              />
+            );
+          }
+        }
       }
-
-      const taskIndex = indexesOnLevel.get(id);
-
-      if (!taskIndex) {
-        throw new Error(`Index is not found for task ${id}`);
-      }
-
-      const [depth, indexStr] = taskIndex;
-
-      renderedList.push(
-        <TaskListTableRow
-          canMoveTasks={canMoveTasks}
-          colors={colors}
-          columns={columns}
-          dateSetup={dateSetup}
-          dependencyMap={dependencyMap}
-          depth={depth}
-          distances={distances}
-          fullRowHeight={fullRowHeight}
-          getTaskCurrentState={getTaskCurrentState}
-          handleAddTask={handleAddTask}
-          handleDeleteTasks={handleDeleteTasks}
-          handleEditTask={handleEditTask}
-          handleMoveTaskBefore={handleMoveTaskBefore}
-          handleMoveTaskAfter={handleMoveTaskAfter}
-          handleMoveTasksInside={handleMoveTasksInside}
-          handleOpenContextMenu={handleOpenContextMenu}
-          hasChildren={checkHasChildren(task, childTasksMap)}
-          icons={icons}
-          indexStr={indexStr}
-          isClosed={Boolean((task as Task)?.hideChildren)}
-          isCut={cutIdsMirror[id]}
-          isEven={index % 2 === 1}
-          isSelected={selectedIdsMirror[id]}
-          isShowTaskNumbers={isShowTaskNumbers}
-          onClick={onClick}
-          onExpanderClick={onExpanderClick}
-          scrollToTask={scrollToTask}
-          selectTaskOnMouseDown={selectTaskOnMouseDown}
-          task={task}
-          key={id}
-          tasks={tasks}
-          draggedTask={draggedTask}
-          setDraggedTask={setDraggedTask}
-        />
-      );
     }
 
     return (
       <>
-        <div
-          style={{
-            height: fullRowHeight * start,
-          }}
-        />
-
-        {renderedList}
+        <div style={{ height: fullRowHeight * start }} />
+        {renderList}
       </>
     );
   }, [
@@ -157,7 +197,11 @@ const TaskListTableDefaultInner: React.FC<TaskListTableProps> = ({
     selectTaskOnMouseDown,
     selectedIdsMirror,
     draggedTask,
+    rowIndexToTasksMap,
+    enableTaskGrouping,
+    mapTaskToNestedIndex,
   ]);
+
 
   return (
     <div

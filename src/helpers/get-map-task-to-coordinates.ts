@@ -1,6 +1,7 @@
 import {
   Distances,
   MapTaskToCoordinates,
+  RowIndexToTasksMap,
   Task,
   TaskCoordinates,
   TaskOrEmpty,
@@ -23,18 +24,18 @@ export const countTaskCoordinates = (
   svgWidth: number,
   sequentialOffset: number = 0
 ): TaskCoordinates => {
-  const { columnWidth, rowHeight } = distances;
+  const { columnWidth } = distances;
 
   const { id, comparisonLevel = 1, progress, type } = task;
 
   const indexesAtLevel = taskToRowIndexMap.get(comparisonLevel);
 
-  console.log("Looking for task id:", task.id, "level:", comparisonLevel);
+  //console.log("Looking for task id:", task.id, "level:", comparisonLevel);
 
-  console.log("taskToRowIndexMap", Array.from(taskToRowIndexMap.entries()).map(([level, map]) => ({
+  /*console.log("taskToRowIndexMap", Array.from(taskToRowIndexMap.entries()).map(([level, map]) => ({
     level,
     rows: Array.from(map.entries())
-  })));
+  })));*/
 
   if (!indexesAtLevel) {
     throw new Error(`Indexes at level ${comparisonLevel} are not found`);
@@ -54,7 +55,7 @@ export const countTaskCoordinates = (
     ? svgWidth - taskXCoordinate(task.start, startDate, viewMode, columnWidth)
     : taskXCoordinate(task.end, startDate, viewMode, columnWidth);
 
-  const levelY = rowIndex * fullRowHeight + rowHeight * (comparisonLevel - 1);
+  const levelY = rowIndex * fullRowHeight;
 
   const y = levelY + taskYOffset + sequentialOffset;
 
@@ -141,10 +142,9 @@ export const getMapTaskToCoordinates = (
   return res;
 };
 
-
 export const countTaskCoordinatesWithGrouping = (
   task: Task,
-  taskToRowIndexMap: TaskToRowIndexMap,
+  rowIndexToTasksMap: RowIndexToTasksMap,
   startDate: Date,
   viewMode: ViewMode,
   rtl: boolean,
@@ -155,16 +155,28 @@ export const countTaskCoordinatesWithGrouping = (
   svgWidth: number,
   sequentialOffset: number = 0
 ): TaskCoordinates => {
-  const { columnWidth, rowHeight } = distances;
+  const { columnWidth } = distances;
   const { id, comparisonLevel = 1, progress, type } = task;
-  const indexesAtLevel = taskToRowIndexMap.get(comparisonLevel);
-  if (!indexesAtLevel) {
-    throw new Error(`Indexes at level ${comparisonLevel} are not found`);
+
+  let rowIndex = -1;
+  let taskIndexInRow = 0;
+
+  const rowMapAtLevel = rowIndexToTasksMap.get(comparisonLevel);
+  if (!rowMapAtLevel) {
+    throw new Error(`No rows found for comparison level ${comparisonLevel}`);
   }
 
-  const rowIndex = indexesAtLevel.get(id);
-  if (typeof rowIndex !== "number") {
-    throw new Error(`Row index for task ${id} is not found`);
+  for (const [currentRowIndex, tasksInRow] of rowMapAtLevel.entries()) {
+    const taskIndex = tasksInRow.findIndex(t => t.id === id);
+    if (taskIndex !== -1) {
+      rowIndex = currentRowIndex;
+      taskIndexInRow = taskIndex;
+      break;
+    }
+  }
+
+  if (rowIndex === -1) {
+    throw new Error(`Task ${id} not found in rowIndexToTasksMap`);
   }
 
   const x1 = rtl
@@ -175,9 +187,11 @@ export const countTaskCoordinatesWithGrouping = (
     ? svgWidth - taskXCoordinate(task.start, startDate, viewMode, columnWidth)
     : taskXCoordinate(task.end, startDate, viewMode, columnWidth);
 
-  const levelY = rowIndex * fullRowHeight + rowHeight * (comparisonLevel - 1);
+  const levelY = rowIndex * fullRowHeight;
 
-  const y = levelY + taskYOffset + sequentialOffset;
+  // Add offset for tasks stacked within the same row  
+  const taskStackOffset = taskIndexInRow * (taskHeight + 2);
+  const y = levelY + taskYOffset + sequentialOffset + taskStackOffset;
 
   const [progressWidth, progressX] =
     type === "milestone"
@@ -207,4 +221,60 @@ export const countTaskCoordinatesWithGrouping = (
     x2: taskX2,
     y
   };
+};
+
+export const getMapTaskToCoordinatesWithGrouping = (
+  tasks: readonly TaskOrEmpty[],
+  visibleTasksMirror: Readonly<Record<string, true>>,
+  rowIndexToTasksMap: RowIndexToTasksMap,
+  startDate: Date,
+  viewMode: ViewMode,
+  rtl: boolean,
+  fullRowHeight: number,
+  taskHeight: number,
+  taskYOffset: number,
+  distances: Distances,
+  svgWidth: number
+): MapTaskToCoordinates => {
+  const res = new Map<number, Map<string, TaskCoordinates>>();
+
+  tasks.forEach(task => {
+    if (task.type === "empty" || task.type === "user") {
+      return;
+    }
+
+    const { id, comparisonLevel = 1 } = task;
+
+    if (!visibleTasksMirror[id]) {
+      return;
+    }
+    const parent = tasks.find((task) => task.id === task.parent);
+
+    const isGroupedChildOfCollapsedUser =
+      parent && parent.type === "user" && parent.hideChildren === true;
+
+    if (isGroupedChildOfCollapsedUser) {
+      return;
+    }
+
+    const taskCoordinates = countTaskCoordinatesWithGrouping(
+      task,
+      rowIndexToTasksMap,
+      startDate,
+      viewMode,
+      rtl,
+      fullRowHeight,
+      taskHeight,
+      taskYOffset,
+      distances,
+      svgWidth
+    );
+
+    const resByLevel =
+      res.get(comparisonLevel) || new Map<string, TaskCoordinates>();
+    resByLevel.set(id, taskCoordinates);
+    res.set(comparisonLevel, resByLevel);
+  });
+
+  return res;
 };

@@ -11,14 +11,16 @@ import {
   Icons,
   MapTaskToNestedIndex,
   OnResizeColumn,
+  RowIndexToTasksMap,
   Task,
   TaskListHeaderProps,
   TaskListTableProps,
-  TaskOrEmpty
+  TaskOrEmpty,
 } from "../../types/public-types";
 
 import { useOptimizedList } from "../../helpers/use-optimized-list";
 
+import { useGroupedVirtualization } from "../../helpers/use-grouped-optimized-list";
 import { useTableListResize } from "../gantt/use-tablelist-resize";
 import { TaskListHeaderActionsProps } from "./TaskListHeaderActions";
 import styles from "./task-list.module.css";
@@ -55,6 +57,7 @@ export type TaskListProps = {
   ) => void;
   icons?: Partial<Icons>;
   isShowTaskNumbers: boolean;
+  rowIndexToTasksMap: RowIndexToTasksMap
   mapTaskToNestedIndex: MapTaskToNestedIndex;
   onClick?: (task: TaskOrEmpty) => void;
   onExpanderClick: (task: Task) => void;
@@ -84,6 +87,7 @@ const TaskListInner: React.FC<TaskListProps & TaskListHeaderActionsProps> = (
     dateSetup,
     dependencyMap,
     distances,
+    rowIndexToTasksMap,
     fontFamily,
     fontSize,
     fullRowHeight,
@@ -116,6 +120,7 @@ const TaskListInner: React.FC<TaskListProps & TaskListHeaderActionsProps> = (
     onExpandAll
   }) => {
   // Manage the column and list table resizing
+
   const [
     columns,
     taskListWidth,
@@ -124,12 +129,17 @@ const TaskListInner: React.FC<TaskListProps & TaskListHeaderActionsProps> = (
     onColumnResizeStart
   ] = useTableListResize(columnsProp, distances, onResizeColumn);
 
-  const renderedIndexes = useOptimizedList(
-    taskListContentRef,
-    "scrollTop",
-    fullRowHeight
-  );
-
+  const renderedIndexes = enableTaskGrouping
+    ? useGroupedVirtualization(
+      taskListContentRef,
+      rowIndexToTasksMap,
+      distances.taskHeight
+    )
+    : useOptimizedList(
+      taskListContentRef,
+      "scrollTop",
+      fullRowHeight
+    );
 
   return (
     <div className={styles.ganttTableRoot} ref={taskListRef}>
@@ -151,6 +161,7 @@ const TaskListInner: React.FC<TaskListProps & TaskListHeaderActionsProps> = (
           onExpandAll={onExpandAll}
           colors={colors}
         />
+
 
         <div
           className={styles.taskListContent}
@@ -176,6 +187,7 @@ const TaskListInner: React.FC<TaskListProps & TaskListHeaderActionsProps> = (
               columns={columns}
               cutIdsMirror={cutIdsMirror}
               enableTaskGrouping={enableTaskGrouping}
+              rowIndexToTasksMap={rowIndexToTasksMap}
               dateSetup={dateSetup}
               dependencyMap={dependencyMap}
               distances={distances}

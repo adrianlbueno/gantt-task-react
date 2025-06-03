@@ -151,12 +151,13 @@ export interface Distances {
   relationCircleOffset: number;
   relationCircleRadius: number;
   rowHeight: number;
+  taskHeight: number;
   tableWidth?: number;
   taskWarningOffset: number;
   titleCellWidth: number;
 }
 
-export type TaskType = "task" | "milestone" | "project" | "vacation" ;
+export type TaskType = "task" | "milestone" | "project" | "vacation";
 
 export interface Task {
   id: string;
@@ -636,6 +637,7 @@ export interface TaskListTableProps {
   canMoveTasks: boolean;
   enableTaskGrouping?: boolean;
   childTasksMap: ChildByLevelMap;
+  rowIndexToTasksMap: RowIndexToTasksMap;
   colors: ColorStyles;
   columns: readonly Column[];
   cutIdsMirror: Readonly<Record<string, true>>;

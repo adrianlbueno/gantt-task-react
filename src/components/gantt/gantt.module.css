@@ -1,5 +1,5 @@
 .ganttTaskRoot {
-  display:flex;
+  display: flex;
   flex-direction: column;
   overflow-x: scroll;
   overflow-y: hidden;
@@ -7,6 +7,7 @@
   margin: 0;
   padding: 0;
 }
+
 /* Only chrome otherwise the firefox scrollbar has no edge*/
 @media screen and (-webkit-min-device-pixel-ratio:0) and (min-resolution:.001dpcm) {
   .ganttTaskRoot {
@@ -44,6 +45,7 @@
   overflow-x: hidden;
   overflow-y: auto;
 }
+
 /* Only chrome otherwise the firefox scrollbar has no edges*/
 @media screen and (-webkit-min-device-pixel-ratio:0) and (min-resolution:.001dpcm) {
   .ganttTaskContent {
@@ -52,7 +54,7 @@
 }
 
 .wrapper {
-  display:grid;
+  display: grid;
   overflow-x: hidden;
   overflow-y: hidden;
   padding: 0;
@@ -60,4 +62,5 @@
   list-style: none;
   outline: none;
   position: relative;
+  height: 800px;
 }

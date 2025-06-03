@@ -11,7 +11,8 @@ import { getDependencyMapAndWarnings } from "../../helpers/get-dependency-map-an
 import {
   countTaskCoordinatesWithGrouping,
   countTaskCoordinates as defaultCountTaskCoordinates,
-  getMapTaskToCoordinates
+  getMapTaskToCoordinates,
+  getMapTaskToCoordinatesWithGrouping
 } from "../../helpers/get-map-task-to-coordinates";
 import { getMapTaskToGlobalIndex } from "../../helpers/get-map-task-to-global-index";
 import { getMapTaskToNestedIndex } from "../../helpers/get-map-task-to-nested-index";
@@ -80,6 +81,7 @@ import { copyTasks } from "../../helpers/copy-tasks";
 import { useHolidays } from "./use-holidays";
 
 import { getMapTaskToRowIndexWithGrouping } from "../../helpers/get-map-task-to-row-index-with-grouping";
+import { useGroupedVirtualization } from "../../helpers/use-grouped-optimized-list";
 import styles from "./gantt.module.css";
 
 const defaultColors: ColorStyles = {
@@ -139,6 +141,7 @@ const defaultDateFormats: DateFormats = {
 const defaultDistances: Distances = {
   actionColumnWidth: 40,
   arrowIndent: 20,
+  taskHeight: 24,
   barCornerRadius: 3,
   barFill: 60,
   columnWidth: 60,
@@ -357,12 +360,6 @@ export const Gantt: React.FC<GanttProps> = ({
     [distances, comparisonLevels]
   );
 
-  const renderedRowIndexes = useOptimizedList(
-    ganttTaskContentRef,
-    "scrollTop",
-    distances.rowHeight
-  );
-
   const colorStyles = useMemo<ColorStyles>(
     () => ({
       ...defaultColors,
@@ -381,6 +378,11 @@ export const Gantt: React.FC<GanttProps> = ({
     [distances, taskHeight]
   );
 
+  const taskHalfHeight = useMemo(
+    () => Math.round(taskHeight / 2),
+    [taskHeight]
+  );
+
   const [taskToRowIndexMap, rowIndexToTaskMap, mapGlobalRowIndexToTask, rowIndexToTasksMap] =
     useMemo(
       () => enableTaskGrouping
@@ -389,16 +391,7 @@ export const Gantt: React.FC<GanttProps> = ({
       [visibleTasks, comparisonLevels, enableTaskGrouping]
     );
 
-  const taskHalfHeight = useMemo(
-    () => Math.round(taskHeight / 2),
-    [taskHeight]
-  );
-
   const maxLevelLength = useMemo(() => {
-    if (enableTaskGrouping) {
-      return Math.max(rowIndexToTasksMap?.size ?? 0, 1); // Ensure at least 1
-    }
-
     let maxLength = 0;
     const countByLevel: Record<string, number> = {};
 
@@ -418,24 +411,35 @@ export const Gantt: React.FC<GanttProps> = ({
     });
 
     return maxLength;
-  }, [visibleTasks, comparisonLevels, enableTaskGrouping, rowIndexToTasksMap]);
+  }, [visibleTasks, comparisonLevels]);
 
   const ganttFullHeight = useMemo(() => {
-    if (enableTaskGrouping) {
-      let totalHeight = 0;
-
-      for (const [, taskMap] of rowIndexToTasksMap) {
-        for (const [, tasks] of taskMap) {
-          const rowHeight = tasks.length * (taskHeight + 2); // actual stacked height
-          totalHeight += Math.max(rowHeight, fullRowHeight); // ensure minimum row height
-        }
-      }
-
-      return Math.max(totalHeight, fullRowHeight);
+    if (!enableTaskGrouping) {
+      return maxLevelLength * fullRowHeight;
     }
 
-    return maxLevelLength * fullRowHeight;
-  }, [enableTaskGrouping, rowIndexToTasksMap, maxLevelLength, fullRowHeight, taskHeight]);
+    let totalRows = 0;
+
+    for (const comparisonMap of rowIndexToTasksMap.values()) {
+      totalRows += comparisonMap.size;
+    }
+
+    return totalRows * fullRowHeight;
+  }, [enableTaskGrouping, rowIndexToTasksMap, maxLevelLength, fullRowHeight]);
+
+
+
+  const renderedRowIndexes = enableTaskGrouping
+    ? useGroupedVirtualization(
+      ganttTaskContentRef,
+      rowIndexToTasksMap,
+      fullRowHeight
+    )
+    : useOptimizedList(
+      ganttTaskContentRef,
+      "scrollTop",
+      fullRowHeight
+    );
 
   const {
     checkHasCopyTasks,
@@ -495,6 +499,7 @@ export const Gantt: React.FC<GanttProps> = ({
       distances.columnWidth,
     [datesLength, distances]
   );
+
   const renderedColumnIndexes = useOptimizedList(
     ganttTaskRootRef,
     "scrollLeft",
@@ -506,26 +511,10 @@ export const Gantt: React.FC<GanttProps> = ({
   const countTaskCoordinates = useCallback(
     (task: Task) => {
       if (enableTaskGrouping) {
-        const comparisonLevel = task.comparisonLevel ?? 1;
-        let sequentialOffset = 0;
-
-        const indexesAtLevel = taskToRowIndexMap.get(comparisonLevel);
-        const rowIndex = indexesAtLevel?.get(task.id);
-
-        if (typeof rowIndex === "number") {
-          const rowTasksAtLevel = rowIndexToTasksMap
-            .get(comparisonLevel)
-            ?.get(rowIndex) ?? [];
-
-          const indexInRow = rowTasksAtLevel.findIndex((t) => t.id === task.id);
-          if (indexInRow !== -1) {
-            sequentialOffset = indexInRow * (taskHeight + 2);
-          }
-        }
 
         return countTaskCoordinatesWithGrouping(
           task,
-          taskToRowIndexMap,
+          rowIndexToTasksMap,
           startDate,
           viewMode,
           rtl,
@@ -534,7 +523,7 @@ export const Gantt: React.FC<GanttProps> = ({
           taskYOffset,
           distances,
           svgWidth,
-          sequentialOffset
+          0
         );
       }
 
@@ -567,9 +556,22 @@ export const Gantt: React.FC<GanttProps> = ({
     ]
   );
 
-  const mapTaskToCoordinates = useMemo(
-    () =>
-      getMapTaskToCoordinates(
+  const mapTaskToCoordinates = useMemo(() =>
+    enableTaskGrouping
+      ? getMapTaskToCoordinatesWithGrouping(
+        tasks,
+        visibleTasksMirror,
+        rowIndexToTasksMap,
+        startDate,
+        viewMode,
+        rtl,
+        fullRowHeight,
+        taskHeight,
+        taskYOffset,
+        distances,
+        svgWidth
+      )
+      : getMapTaskToCoordinates(
         tasks,
         visibleTasksMirror,
         taskToRowIndexMap,
@@ -583,17 +585,19 @@ export const Gantt: React.FC<GanttProps> = ({
         svgWidth
       ),
     [
-      distances,
-      fullRowHeight,
-      taskToRowIndexMap,
-      rtl,
-      startDate,
-      svgWidth,
-      taskHeight,
       tasks,
-      taskYOffset,
+      visibleTasksMirror,
+      rowIndexToTasksMap,
+      taskToRowIndexMap,
+      startDate,
       viewMode,
-      visibleTasksMirror
+      rtl,
+      fullRowHeight,
+      taskHeight,
+      taskYOffset,
+      distances,
+      svgWidth,
+      enableTaskGrouping
     ]
   );
 
@@ -755,8 +759,6 @@ export const Gantt: React.FC<GanttProps> = ({
 
   const handleExpanderClick = useCallback(
     (clickedTask: Task) => {
-      console.log(`Task ${clickedTask.id} hideChildren changed from ${clickedTask.hideChildren} to ${!clickedTask.hideChildren}`);
-      console.log('Task types:', tasks.map(task => `${task.id}: ${task.type}`));
 
       if (onChangeExpandState) {
         onChangeExpandState({
@@ -1941,10 +1943,13 @@ export const Gantt: React.FC<GanttProps> = ({
     ]
   );
 
+  //console.log("rowIndexToTasksMap testinnggggggggggggg", rowIndexToTasksMap)
+
   const tableProps: TaskListProps = {
     TaskListHeader,
     TaskListTable,
     enableTaskGrouping,
+    rowIndexToTasksMap,
     canMoveTasks,
     canResizeColumns,
     childTasksMap,

@@ -10,7 +10,7 @@ export const Comparison: React.FC = props => {
   const [tasks, setTasks] = useState<readonly TaskOrEmpty[]>(() => {
     const firstLevelTasks = initTasksUser();
 
-     firstLevelTasks.map(
+    firstLevelTasks.map(
       (task) => ({
         ...task,
         comparisonLevel: 2

@@ -16,6 +16,9 @@ export const getMapTaskToRowIndexWithGrouping = (
     GlobalRowIndexToTaskMap,
     RowIndexToTasksMap
   ] => {
+
+  console.log('compararionLevels', comparisonLevels);
+
   const taskToRowIndexMap = new Map<number, Map<string, number>>();
   const rowIndexToTaskMap = new Map<number, Map<number, TaskOrEmpty>>();
   const rowIndexToTasksMap = new Map<number, Map<number, TaskOrEmpty[]>>();
