@@ -31,14 +31,21 @@ export const useGroupedVirtualization = (
             .sort((a, b) => a.rowIndex - b.rowIndex);
     }, [rowIndexToTasksMap, taskHeight]);
 
-    if (rowEntries.length === 0) {
-        // Fallback until data is ready
+    // 🛡️ Fallback for empty entries
+    if (!rowEntries || rowEntries.length === 0) {
         return [0, 0, true, true, 0];
     }
 
-    const startRow = rowEntries[0].rowIndex;
-    const endRow = rowEntries[rowEntries.length - 1].rowIndex;
+    const first = rowEntries[0];
+    const last = rowEntries[rowEntries.length - 1];
     const fullHeight = rowEntries.reduce((sum, r) => sum + r.height, 0);
 
-    return [startRow, endRow, true, true, fullHeight];
+    return [
+        first?.rowIndex ?? 0,
+        last?.rowIndex ?? 0,
+        true,
+        true,
+        fullHeight
+    ];
 };
+
