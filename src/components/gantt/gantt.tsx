@@ -431,7 +431,7 @@ export const Gantt: React.FC<GanttProps> = ({
 
   const renderedRowIndexes = enableTaskGrouping
     ? useGroupedVirtualization(
-      //ganttTaskContentRef,
+      ganttTaskContentRef,
       rowIndexToTasksMap,
       fullRowHeight
     )
