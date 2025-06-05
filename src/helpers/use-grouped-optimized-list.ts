@@ -1,13 +1,13 @@
-import { useMemo } from "react"
-import type { RowIndexToTasksMap } from "../types/public-types"
-import { OptimizedListParams } from "./use-optimized-list"
+import { useMemo } from "react";
+import type { RowIndexToTasksMap } from "../types/public-types";
+import { OptimizedListParams } from "./use-optimized-list";
 
-const TASK_SPACING = 2
+/*const TASK_SPACING = 2
 
 interface RowEntry {
     rowIndex: number
     height: number
-}
+}*/
 
 /*interface ScrollMetrics {
     scrollTop: number
