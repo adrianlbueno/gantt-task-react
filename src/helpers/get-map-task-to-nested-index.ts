@@ -5,58 +5,51 @@ import {
   TaskOrEmpty,
 } from "../types/public-types";
 
-const getMapTaskTo = (
-  indexesOnLevel: Map<string, [number, string]>,
-  taskId: string,
+const setIndex = (
+  map: MapTaskToNestedIndex,
   level: number,
-  collectedIndex: string,
-  childTasksOnLevel: Map<string, TaskOrEmpty[]>,
+  id: string,
+  depth: number,
+  indexStr: string
 ) => {
-  const childs = childTasksOnLevel.get(taskId);
-
-  if (childs && childs.length > 0) {
-    childs.forEach(({
-      id: childId,
-    }, index) => {
-      const childIndex = `${collectedIndex}.${index + 1}`;
-      indexesOnLevel.set(childId, [level, childIndex]);
-
-      getMapTaskTo(
-        indexesOnLevel,
-        childId,
-        level + 1,
-        childIndex,
-        childTasksOnLevel,
-      );
-    });
+  if (!map.has(level)) {
+    map.set(level, new Map());
   }
+  map.get(level)!.set(id, [depth, indexStr]);
+};
+
+const walkTasks = (
+  map: MapTaskToNestedIndex,
+  comparisonLevel: number,
+  parentId: string,
+  depth: number,
+  prefix: string,
+  childTasksMap: Map<string, TaskOrEmpty[]>
+) => {
+  const children = childTasksMap.get(parentId);
+  if (!children) return;
+
+  children.forEach((child, i) => {
+    const indexStr = `${prefix}.${i + 1}`;
+    setIndex(map, comparisonLevel, child.id, depth, indexStr);
+    walkTasks(map, comparisonLevel, child.id, depth + 1, indexStr, childTasksMap);
+  });
 };
 
 export const getMapTaskToNestedIndex = (
   childTasksMap: ChildByLevelMap,
-  rootTasksMap: RootMapByLevel,
+  rootTasksMap: RootMapByLevel
 ): MapTaskToNestedIndex => {
-  const res = new Map<number, Map<string, [number, string]>>();
+  const map: MapTaskToNestedIndex = new Map();
 
   for (const [comparisonLevel, rootTasks] of rootTasksMap.entries()) {
-    const indexesOnLevel = new Map<string, [number, string]>();
-    const childTasksOnLevel = childTasksMap.get(comparisonLevel) || new Map<string, TaskOrEmpty[]>();
-    
-    rootTasks.forEach(({ id: rootId }, index) => {
-      const rootIndex = `${index + 1}`;
-      indexesOnLevel.set(rootId, [0, rootIndex]);
+    const childMap = childTasksMap.get(comparisonLevel) ?? new Map();
 
-      getMapTaskTo(
-        indexesOnLevel,
-        rootId,
-        1,
-        rootIndex,
-        childTasksOnLevel,
-      );
+    rootTasks.forEach((task, i) => {
+      const indexStr = `${i + 1}`;
+      setIndex(map, comparisonLevel, task.id, 0, indexStr);
+      walkTasks(map, comparisonLevel, task.id, 1, indexStr, childMap);
     });
-
-    res.set(comparisonLevel, indexesOnLevel);
   }
-
-  return res;
+  return map;
 };

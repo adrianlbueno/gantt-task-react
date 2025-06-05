@@ -1,4 +1,4 @@
-import { RefObject, useEffect, useMemo, useState } from "react"
+import { useMemo } from "react"
 import type { RowIndexToTasksMap } from "../types/public-types"
 import { OptimizedListParams } from "./use-optimized-list"
 
@@ -9,149 +9,101 @@ interface RowEntry {
     height: number
 }
 
-interface ScrollMetrics {
+/*interface ScrollMetrics {
     scrollTop: number
     clientHeight: number
     scrollHeight: number
 }
-
-interface VisibleRange {
-    startIdx: number
-    endIdx: number
-    atStart: boolean
-    atEnd: boolean
-}
-
-const getScrollMetrics = (containerRef: Element | null): ScrollMetrics => {
-
-    if (!containerRef) return { scrollTop: 0, clientHeight: 0, scrollHeight: 0 };
-
+*/
+/*
+const getScrollMetrics = (el: HTMLElement | null): ScrollMetrics => {
     return {
-        scrollTop: containerRef?.scrollTop ?? 0,
-        clientHeight: containerRef?.clientHeight ?? 0,
-        scrollHeight: containerRef?.scrollHeight ?? 0,
+        scrollTop: el?.scrollTop ?? 0,
+        clientHeight: el?.clientHeight ?? 0,
+        scrollHeight: el?.scrollHeight ?? 0,
     }
 }
-
+*/
 const buildRowEntries = (
     rowIndexToTasksMap: RowIndexToTasksMap,
     taskHeight: number
 ): RowEntry[] => {
-    const entries: RowEntry[] = []
-    const rowToTasksCount = new Map<number, number>()
+    const rowToTaskCount = new Map<number, number>()
 
-    for (const [_comparisonLevel, rowMap] of rowIndexToTasksMap.entries()) {
+    for (const rowMap of rowIndexToTasksMap.values()) {
         for (const [rowIndex, tasks] of rowMap.entries()) {
-            const currentCount = rowToTasksCount.get(rowIndex) || 0
-            rowToTasksCount.set(rowIndex, currentCount + tasks.length)
+            rowToTaskCount.set(rowIndex, (rowToTaskCount.get(rowIndex) ?? 0) + tasks.length)
         }
     }
-    for (const [rowIndex, totalTasks] of rowToTasksCount.entries()) {
-        const effectiveRowHeight = totalTasks * (taskHeight + TASK_SPACING)
-        entries.push({ rowIndex, height: effectiveRowHeight })
-    }
 
-    return entries.sort((a, b) => a.rowIndex - b.rowIndex)
+    return [...rowToTaskCount.entries()]
+        .map(([rowIndex, count]) => ({
+            rowIndex,
+            height: count * (taskHeight + TASK_SPACING)
+        }))
+        .sort((a, b) => a.rowIndex - b.rowIndex)
 }
-
+{/*
 const calculateVisibleRange = (
     entries: RowEntry[],
     scrollTop: number,
     clientHeight: number
-): VisibleRange => {
-    if (entries.length === 0) {
-        return {
-            startIdx: 0,
-            endIdx: 0,
-            atStart: true,
-            atEnd: true,
-        }
-    }
-
-    let cumulative = 0
-    let startIdx = -1
-    let endIdx = -1
+) => {
+    let startIdx = -1, endIdx = -1, cumulative = 0;
 
     for (let i = 0; i < entries.length; i++) {
-        const entry = entries[i]
-        const rowTop = cumulative
-        const rowBottom = cumulative + entry.height
+        const { height } = entries[i];
+        const rowTop = cumulative;
+        const rowBottom = cumulative + height;
 
         if (startIdx === -1 && rowBottom > scrollTop) {
-            startIdx = i
+            startIdx = i;
         }
 
         if (rowTop < scrollTop + clientHeight) {
-            endIdx = i
+            endIdx = i;
         }
 
-        cumulative += entry.height
+        cumulative += height;
     }
 
-    const finalStartIdx = startIdx === -1 ? 0 : startIdx
-    const finalEndIdx = endIdx === -1 ? Math.max(0, entries.length - 1) : endIdx
+    if (
+        endIdx < entries.length - 1 &&
+        cumulative < scrollTop + clientHeight
+    ) {
+        endIdx++;
+    }
+
+    const s = Math.max(0, startIdx === -1 ? 0 : startIdx);
+    const e = Math.min(entries.length - 1, endIdx === -1 ? entries.length - 1 : endIdx);
 
     return {
-        startIdx: Math.max(0, finalStartIdx),
-        endIdx: Math.min(entries.length - 1, finalEndIdx),
+        startRow: entries[s]?.rowIndex ?? 0,
+        endRow: entries[e]?.rowIndex ?? 0,
         atStart: scrollTop <= 0,
         atEnd: scrollTop + clientHeight >= cumulative,
-    }
-}
+        clientHeight
+    };
+};
+*/}
+
 
 export const useGroupedVirtualization = (
-    containerRef: RefObject<Element>,
+    //containerRef: RefObject<HTMLElement>,
     rowIndexToTasksMap: RowIndexToTasksMap,
     taskHeight: number
 ): OptimizedListParams => {
-
-    const [scrollMetrics, setScrollMetrics] = useState(() => getScrollMetrics(containerRef.current) || { scrollTop: 0, clientHeight: 0, scrollHeight: 0 })
-
-    const rowEntries = useMemo(
-        () => buildRowEntries(rowIndexToTasksMap, taskHeight),
+    const rowEntries = useMemo(() =>
+        buildRowEntries(rowIndexToTasksMap, taskHeight),
         [rowIndexToTasksMap, taskHeight]
-    )
+    );
 
-    const { startIdx, endIdx, atStart, atEnd } = useMemo(() =>
-        calculateVisibleRange(
-            rowEntries,
-            scrollMetrics.scrollTop,
-            scrollMetrics.clientHeight
-        ), [rowEntries, scrollMetrics.scrollTop, scrollMetrics.clientHeight]
-    )
-
-    useEffect(() => {
-        let rafId: number | null = null
-        let prevMetrics = scrollMetrics
-
-        const handler = () => {
-            const newMetrics = getScrollMetrics(containerRef.current)
-
-            const hasChanged =
-                newMetrics.scrollTop !== prevMetrics.scrollTop ||
-                newMetrics.clientHeight !== prevMetrics.clientHeight ||
-                newMetrics.scrollHeight !== prevMetrics.scrollHeight
-
-            if (hasChanged) {
-                prevMetrics = newMetrics
-                setScrollMetrics(newMetrics)
-            }
-
-            rafId = requestAnimationFrame(handler)
-        }
-
-        const element = containerRef.current
-
-        if (element) {
-            rafId = requestAnimationFrame(handler)
-        }
-
-        return () => {
-            if (rafId) cancelAnimationFrame(rafId)
-        }
-    }, [containerRef])
-
-    console.log("startIdx, endIdx, atStart, atEnd, scrollMetrics.clientHeight", startIdx, endIdx, atStart, atEnd, scrollMetrics.clientHeight)
-
-    return [startIdx, endIdx, atStart, atEnd, scrollMetrics.clientHeight]
-}
+    // 👇 full visible range (no virtualization)
+    return [
+        rowEntries[0]?.rowIndex ?? 0,
+        rowEntries[rowEntries.length - 1]?.rowIndex ?? 0,
+        true,
+        true,
+        rowEntries.reduce((sum, entry) => sum + entry.height, 0)
+    ];
+};

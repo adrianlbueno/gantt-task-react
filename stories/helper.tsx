@@ -69,6 +69,7 @@ export function initTasksUser(): TaskOrEmpty[] {
       type: "empty",
       hideChildren: false,
     },
+
     {
       id: "audit-4 no dates",
       type: "task",
@@ -82,6 +83,16 @@ export function initTasksUser(): TaskOrEmpty[] {
       id: "ProjectId",
       type: "project",
       name: "Project one",
+      start: new Date(currentDate.getFullYear(), currentDate.getMonth(), 15),
+      end: new Date(currentDate.getFullYear(), currentDate.getMonth(), 15),
+      progress: 70,
+      displayOrder: 4,
+      hideChildren: false
+    },
+    {
+      id: "ProjectIdcandoit",
+      type: "project",
+      name: "Project two",
       start: new Date(currentDate.getFullYear(), currentDate.getMonth(), 15),
       end: new Date(currentDate.getFullYear(), currentDate.getMonth(), 15),
       progress: 70,
@@ -114,7 +125,7 @@ export function initTasksUser(): TaskOrEmpty[] {
     {
       id: "ProjectId-user-cooler",
       type: "task",
-      name: "Project one",
+      name: "Development",
       start: new Date(currentDate.getFullYear(), currentDate.getMonth(), 15),
       end: new Date(currentDate.getFullYear(), currentDate.getMonth(), 15),
       progress: 70,
@@ -139,7 +150,62 @@ export function initTasksUser(): TaskOrEmpty[] {
       hideChildren: false,
       parent: "user-coolerer"
     },
-
+    {
+      id: "user-adrian",
+      type: "user",
+      name: "Leonardo Bueno",
+      hideChildren: true,
+    },
+    {
+      id: "ProjectId-user-adrian",
+      type: "task",
+      name: "Testing coolerere",
+      start: new Date(currentDate.getFullYear(), currentDate.getMonth(), 15),
+      end: new Date(currentDate.getFullYear(), currentDate.getMonth(), 15),
+      progress: 70,
+      displayOrder: 4,
+      hideChildren: false,
+      parent: "user-adrian"
+    },
+    {
+      id: "user-1-final",
+      type: "user",
+      name: "Adrian Bueno",
+      hideChildren: true,
+    },
+    {
+      id: "audit-1-final",
+      type: "task",
+      name: "final one",
+      start: new Date(currentDate.getFullYear(), currentDate.getMonth(), 8),
+      end: new Date(currentDate.getFullYear(), currentDate.getMonth(), 12),
+      progress: 50,
+      parent: "user-1-final",
+    },
+    {
+      id: "user-1-final.test",
+      type: "user",
+      name: "Adrian Buenooe",
+      hideChildren: true,
+    },
+    {
+      id: "audit-1-final.testing",
+      type: "task",
+      name: "final one",
+      start: new Date(currentDate.getFullYear(), currentDate.getMonth(), 8),
+      end: new Date(currentDate.getFullYear(), currentDate.getMonth(), 12),
+      progress: 50,
+      parent: "user-1-final.test",
+    },
+    {
+      id: "audit-1-final-vacation",
+      type: "vacation",
+      name: "vacation thing",
+      start: new Date(currentDate.getFullYear(), currentDate.getMonth(), 8),
+      end: new Date(currentDate.getFullYear(), currentDate.getMonth(), 12),
+      progress: 50,
+      parent: "user-1-final.test",
+    },
   ];
 
   return tasks.map(taskOrEmpty => {

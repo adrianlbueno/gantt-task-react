@@ -53,7 +53,6 @@ export const Comparison: React.FC = props => {
 
   return (
     <Gantt
-      comparisonLevels={2}
       {...props}
       enableTaskGrouping={true}
       onAddTask={onAddTask}

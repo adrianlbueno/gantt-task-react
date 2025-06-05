@@ -131,7 +131,7 @@ const TaskListInner: React.FC<TaskListProps & TaskListHeaderActionsProps> = (
 
   const renderedIndexes = enableTaskGrouping
     ? useGroupedVirtualization(
-      taskListContentRef,
+      //taskListContentRef,
       rowIndexToTasksMap,
       distances.taskHeight
     )

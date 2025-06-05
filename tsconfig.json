@@ -17,11 +17,13 @@
     "declaration": true,
     "emitDeclarationOnly": true,
     "sourceMap": true,
-
     "outDir": "dist",
     "lib": [
       "dom",
-      "esnext"
+      "dom.iterable",
+      "esnext",
+      "es5",
+      "es6",
     ],
     "jsx": "react",
     "noImplicitReturns": true,

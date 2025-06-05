@@ -13,8 +13,6 @@ const collectChildren = (
 ) => {
   const { comparisonLevel = 1 } = task;
 
-  console.log(`Task ${task.id} visibility check: type=${task.type}, hideChildren=${task.hideChildren}, will ${(task.type === "empty" || (task.hideChildren && task.type !== "user")) ? 'hide' : 'show'} children`);
-
   arrayRes.push(task);
 
   if (comparisonLevel === 1) {

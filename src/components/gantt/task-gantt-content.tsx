@@ -18,12 +18,13 @@ import {
   FixPosition,
   GlobalRowIndexToTaskMap,
   RelationKind,
+  RowIndexToTasksMap,
   Task,
   TaskContextualPaletteProps,
   TaskCoordinates,
   TaskDependencyContextualPaletteProps,
   TaskOrEmpty,
-  TaskToHasDependencyWarningMap, TaskToRowIndexMap,
+  TaskToHasDependencyWarningMap, TaskToRowIndexMap
 } from "../../types/public-types";
 import { Arrow } from "../other/arrow";
 import { RelationLine } from "../other/relation-line";
@@ -41,6 +42,8 @@ export type TaskGanttContentProps = {
   criticalPaths: CriticalPaths | null;
   dependencyMap: DependencyMap;
   dependentMap: DependentMap;
+  enableTaskGrouping: boolean;
+  rowIndexToTasksMap: RowIndexToTasksMap;
   distances: Distances;
   fixEndPosition?: FixPosition;
   fixStartPosition?: FixPosition;
@@ -110,6 +113,8 @@ export const TaskGanttContent: React.FC<TaskGanttContentProps> = ({
   handleFixDependency,
   handleTaskDragStart,
   isShowDependencyWarnings,
+  enableTaskGrouping,
+  rowIndexToTasksMap,
   mapGlobalRowIndexToTask,
   onArrowDoubleClick,
   onArrowClick,
@@ -128,9 +133,7 @@ export const TaskGanttContent: React.FC<TaskGanttContentProps> = ({
   taskToRowIndexMap,
 }) => {
   const [renderedTasks, renderedArrows, renderedSelectedTasks] = useMemo(() => {
-    if (!renderedRowIndexes) {
-      return [null, null, null];
-    }
+    if (!renderedRowIndexes) return [null, null, null];
 
     const [start, end] = renderedRowIndexes;
 
@@ -138,309 +141,212 @@ export const TaskGanttContent: React.FC<TaskGanttContentProps> = ({
     const arrowsRes: ReactNode[] = [];
     const selectedTasksRes: ReactNode[] = [];
 
-    // task id -> true
     const addedSelectedTasks: Record<string, true> = {};
-
-    // avoid duplicates
-    // comparison level -> task from id -> task to id -> true
-    const addedDependencies: Record<
-      string,
-      Record<string, Record<string, true>>
-    > = {};
-    console.log("mapGlobalRowIndexToTask", mapGlobalRowIndexToTask);
-
+    const addedDependencies: Record<string, Record<string, Record<string, true>>> = {};
 
     for (let index = start; index <= end; ++index) {
-      const task = mapGlobalRowIndexToTask.get(index);
+      const tasksAtRow: TaskOrEmpty[] = [];
 
-      if (!task) {
-        continue;
-      }
-
-      const { comparisonLevel = 1, id: taskId } = task;
-
-      if (selectedIdsMirror[taskId] && !addedSelectedTasks[taskId]) {
-        addedSelectedTasks[taskId] = true;
-
-        const rowIndex =
-          taskToRowIndexMap
-            .get(comparisonLevel)
-            ?.get(taskId);
-
-        if (typeof rowIndex === "number") {
-          const y = rowIndex * fullRowHeight;
-
-          selectedTasksRes.push(
-            <rect
-              x={0}
-              y={y}
-              width="100%"
-              height={fullRowHeight}
-              fill={colorStyles.selectedTaskBackgroundColor}
-              key={`selected-${taskId}`}
-            />
-          );
+      if (enableTaskGrouping) {
+        for (let level = 1; level <= comparisonLevels; level++) {
+          const levelMap = rowIndexToTasksMap.get(level);
+          const rowTasks = levelMap?.get(index);
+          if (Array.isArray(rowTasks)) {
+            tasksAtRow.push(...rowTasks);
+          }
         }
+      } else {
+        const task = mapGlobalRowIndexToTask.get(index);
+        if (task) tasksAtRow.push(task);
       }
+      console.log("tasksAtRow", tasksAtRow)
+      for (const task of tasksAtRow) {
+        const comparisonLevel = task.comparisonLevel ?? 1;
+        const { id: taskId } = task;
 
-      if (comparisonLevel > comparisonLevels) {
-        continue;
-      }
+        if (selectedIdsMirror[taskId] && !addedSelectedTasks[taskId]) {
+          addedSelectedTasks[taskId] = true;
 
-      if (task.type === "empty" || task.type === "user") {
-        continue;
-      }
+          const rowIndex = taskToRowIndexMap.get(comparisonLevel)?.get(taskId);
+          if (typeof rowIndex === "number") {
+            selectedTasksRes.push(
+              <rect
+                x={0}
+                y={rowIndex * fullRowHeight}
+                width="100%"
+                height={fullRowHeight}
+                fill={colorStyles.selectedTaskBackgroundColor}
+                key={`selected-${taskId}`}
+              />
+            );
+          }
+        }
 
-      const key = `${comparisonLevel}_${task.id}`;
+        if (comparisonLevel > comparisonLevels) continue;
+        if (task.type === "empty" || task.type === "user") continue;
 
-      const criticalPathOnLevel = criticalPaths
-        ? criticalPaths.get(comparisonLevel)
-        : undefined;
+        const key = `${comparisonLevel}_${task.id}`;
+        const criticalPathOnLevel = criticalPaths?.get(comparisonLevel);
+        const isCritical = !!criticalPathOnLevel?.tasks.has(task.id);
 
-      const isCritical = criticalPathOnLevel
-        ? criticalPathOnLevel.tasks.has(task.id)
-        : false;
+        const {
+          containerX, containerWidth, innerX1, innerX2, width, levelY,
+          progressWidth, x1: taskX1, x2: taskX2
+        } = getTaskCoordinates(task);
 
-      const {
-        containerX,
-        containerWidth,
-        innerX1,
-        innerX2,
-        width,
-        levelY,
-        progressWidth,
-        x1: taskX1,
-        x2: taskX2,
-      } = getTaskCoordinates(task);
-
-      tasksRes.push(
-        <svg
-          id={task.id}
-          className="TaskItemClassName"
-          x={containerX + (additionalLeftSpace || 0)}
-          y={levelY}
-          width={containerWidth}
-          height={fullRowHeight}
-          key={key}
-        >
-          <TaskItem
-            getTaskGlobalIndexByRef={getTaskGlobalIndexByRef}
-            hasChildren={checkHasChildren(task, childTasksMap)}
-            hasDependencyWarning={
-              taskToHasDependencyWarningMap
-                ? checkTaskHasDependencyWarning(
-                  task,
-                  taskToHasDependencyWarningMap
-                )
-                : false
-            }
-            progressWidth={progressWidth}
-            progressX={rtl ? innerX2 : innerX1}
-            selectTaskOnMouseDown={selectTaskOnMouseDown}
-            task={task}
-            taskYOffset={taskYOffset}
-            width={width}
-            x1={innerX1}
-            x2={innerX2}
-            childOutOfParentWarnings={childOutOfParentWarnings}
-            distances={distances}
-            taskHeight={taskHeight}
-            taskHalfHeight={taskHalfHeight}
-            isProgressChangeable={!task.isDisabled}
-            isDateChangeable={!task.isDisabled}
-            isRelationChangeable={!task.isRelationDisabled}
-            authorizedRelations={authorizedRelations}
-            ganttRelationEvent={ganttRelationEvent}
-            isDelete={!task.isDisabled}
-            onDoubleClick={onDoubleClick}
-            onClick={onClick}
-            onEventStart={handleTaskDragStart}
-            setTooltipTask={setTooltipTask}
-            onRelationStart={handleBarRelationStart}
-            isSelected={Boolean(selectedIdsMirror[taskId])}
-            isCritical={isCritical}
-            rtl={rtl}
-            fixStartPosition={fixStartPosition}
-            fixEndPosition={fixEndPosition}
-            handleDeleteTasks={handleDeleteTasks}
-            colorStyles={colorStyles}
-          />
-        </svg>
-      );
-
-      const addedDependenciesAtLevel = addedDependencies[comparisonLevel] || {};
-      if (!addedDependencies[comparisonLevel]) {
-        addedDependencies[comparisonLevel] = addedDependenciesAtLevel;
-      }
-
-      const addedDependenciesAtTask = addedDependenciesAtLevel[taskId] || {};
-      if (!addedDependenciesAtLevel[taskId]) {
-        addedDependenciesAtLevel[taskId] = addedDependenciesAtTask;
-      }
-
-      const dependenciesAtLevel = dependencyMap.get(comparisonLevel);
-
-      if (!dependenciesAtLevel) {
-        continue;
-      }
-
-      const dependenciesByTask = dependenciesAtLevel.get(taskId);
-
-      if (dependenciesByTask) {
-        const criticalPathForTask = criticalPathOnLevel
-          ? criticalPathOnLevel.dependencies.get(task.id)
-          : undefined;
-
-        dependenciesByTask
-          .filter(({ source }) => visibleTasksMirror[source.id])
-          .forEach(
-            ({
-              containerHeight,
-              containerY,
-              innerFromY,
-              innerToY,
-              marginBetweenTasks,
-              ownTarget,
-              source,
-              sourceTarget,
-            }) => {
-              if (addedDependenciesAtTask[source.id]) {
-                return;
+        tasksRes.push(
+          <svg
+            id={task.id}
+            className="TaskItemClassName"
+            x={containerX + additionalLeftSpace}
+            y={levelY}
+            width={containerWidth}
+            height={fullRowHeight}
+            key={key}
+          >
+            <TaskItem
+              getTaskGlobalIndexByRef={getTaskGlobalIndexByRef}
+              hasChildren={checkHasChildren(task, childTasksMap)}
+              hasDependencyWarning={
+                taskToHasDependencyWarningMap
+                  ? checkTaskHasDependencyWarning(task, taskToHasDependencyWarningMap)
+                  : false
               }
+              progressWidth={progressWidth}
+              progressX={rtl ? innerX2 : innerX1}
+              selectTaskOnMouseDown={selectTaskOnMouseDown}
+              task={task}
+              taskYOffset={taskYOffset}
+              width={width}
+              x1={innerX1}
+              x2={innerX2}
+              childOutOfParentWarnings={childOutOfParentWarnings}
+              distances={distances}
+              taskHeight={taskHeight}
+              taskHalfHeight={taskHalfHeight}
+              isProgressChangeable={!task.isDisabled}
+              isDateChangeable={!task.isDisabled}
+              isRelationChangeable={!task.isRelationDisabled}
+              authorizedRelations={authorizedRelations}
+              ganttRelationEvent={ganttRelationEvent}
+              isDelete={!task.isDisabled}
+              onDoubleClick={onDoubleClick}
+              onClick={onClick}
+              onEventStart={handleTaskDragStart}
+              setTooltipTask={setTooltipTask}
+              onRelationStart={handleBarRelationStart}
+              isSelected={Boolean(selectedIdsMirror[taskId])}
+              isCritical={isCritical}
+              rtl={rtl}
+              fixStartPosition={fixStartPosition}
+              fixEndPosition={fixEndPosition}
+              handleDeleteTasks={handleDeleteTasks}
+              colorStyles={colorStyles}
+            />
+          </svg>
+        );
 
-              addedDependenciesAtTask[source.id] = true;
+        const addedDependenciesAtLevel = addedDependencies[comparisonLevel] ??= {};
+        const addedDependenciesAtTask = addedDependenciesAtLevel[taskId] ??= {};
 
-              const isCritical = criticalPathForTask
-                ? criticalPathForTask.has(source.id)
-                : false;
+        const dependenciesAtLevel = dependencyMap.get(comparisonLevel);
+        const dependenciesByTask = dependenciesAtLevel?.get(taskId);
 
-              const { x1: fromX1, x2: fromX2 } = getTaskCoordinates(source);
+        dependenciesByTask?.filter(({ source }) => visibleTasksMirror[source.id]).forEach(dep => {
+          if (addedDependenciesAtTask[dep.source.id]) return;
+          addedDependenciesAtTask[dep.source.id] = true;
 
-              const containerX = Math.min(fromX1, taskX1) - 300;
-              const containerWidth =
-                Math.max(fromX2, taskX2) - containerX + 300;
+          const { x1: fromX1, x2: fromX2 } = getTaskCoordinates(dep.source);
+          const containerX = Math.min(fromX1, taskX1) - 300;
+          const containerWidth = Math.max(fromX2, taskX2) - containerX + 300;
+          const isDepCritical = !!criticalPathOnLevel?.dependencies.get(task.id)?.has(dep.source.id);
 
-              arrowsRes.push(
-                <svg
-                  className="ArrowClassName"
-                  x={containerX + (additionalLeftSpace || 0)}
-                  y={containerY}
-                  width={containerWidth}
-                  height={containerHeight}
-                  key={`Arrow from ${source.id} to ${taskId} on ${comparisonLevel}`}
-                >
-                  <Arrow
-                    colorStyles={colorStyles}
-                    distances={distances}
-                    taskFrom={source}
-                    extremityFrom={sourceTarget}
-                    fromX1={fromX1 - containerX}
-                    fromX2={fromX2 - containerX}
-                    fromY={innerFromY}
-                    taskTo={task}
-                    extremityTo={ownTarget}
-                    toX1={taskX1 - containerX}
-                    toX2={taskX2 - containerX}
-                    toY={innerToY}
-                    marginBetweenTasks={marginBetweenTasks}
-                    fullRowHeight={fullRowHeight}
-                    taskHeight={taskHeight}
-                    isShowDependencyWarnings={isShowDependencyWarnings}
-                    isCritical={isCritical}
-                    rtl={rtl}
-                    onArrowDoubleClick={onArrowDoubleClick}
-                    onArrowClick={onArrowClick}
-                    handleFixDependency={handleFixDependency}
-                  />
-                </svg>
-              );
-            }
+          arrowsRes.push(
+            <svg
+              className="ArrowClassName"
+              x={containerX + additionalLeftSpace}
+              y={dep.containerY}
+              width={containerWidth}
+              height={dep.containerHeight}
+              key={`Arrow from ${dep.source.id} to ${taskId} on ${comparisonLevel}`}
+            >
+              <Arrow
+                colorStyles={colorStyles}
+                distances={distances}
+                taskFrom={dep.source}
+                extremityFrom={dep.sourceTarget}
+                fromX1={fromX1 - containerX}
+                fromX2={fromX2 - containerX}
+                fromY={dep.innerFromY}
+                taskTo={task}
+                extremityTo={dep.ownTarget}
+                toX1={taskX1 - containerX}
+                toX2={taskX2 - containerX}
+                toY={dep.innerToY}
+                marginBetweenTasks={dep.marginBetweenTasks}
+                fullRowHeight={fullRowHeight}
+                taskHeight={taskHeight}
+                isShowDependencyWarnings={isShowDependencyWarnings}
+                isCritical={isDepCritical}
+                rtl={rtl}
+                onArrowDoubleClick={onArrowDoubleClick}
+                onArrowClick={onArrowClick}
+                handleFixDependency={handleFixDependency}
+              />
+            </svg>
           );
-      }
+        });
 
-      const dependentsAtLevel = dependentMap.get(comparisonLevel);
+        const dependentsAtLevel = dependentMap.get(comparisonLevel);
+        const dependentsByTask = dependentsAtLevel?.get(taskId);
 
-      if (!dependentsAtLevel) {
-        continue;
-      }
+        dependentsByTask?.filter(({ dependent }) => visibleTasksMirror[dependent.id]).forEach(dep => {
+          console.log("dependent", dep)
+          const addedDepsForDep = addedDependenciesAtLevel[dep.dependent.id] ??= {};
 
-      const dependentsByTask = dependentsAtLevel.get(taskId);
+          if (addedDepsForDep[taskId]) return;
+          addedDepsForDep[taskId] = true;
 
-      if (dependentsByTask) {
-        dependentsByTask
-          .filter(({ dependent }) => visibleTasksMirror[dependent.id])
-          .forEach(
-            ({
-              containerHeight,
-              containerY,
-              innerFromY,
-              innerToY,
-              marginBetweenTasks,
-              ownTarget,
-              dependent,
-              dependentTarget,
-            }) => {
-              const addedDependenciesAtDependent =
-                addedDependenciesAtLevel[dependent.id] || {};
-              if (!addedDependenciesAtLevel[dependent.id]) {
-                addedDependenciesAtLevel[dependent.id] =
-                  addedDependenciesAtDependent;
-              }
+          const isDepCritical = !!criticalPathOnLevel?.dependencies.get(dep.dependent.id)?.has(task.id);
+          const { x1: toX1, x2: toX2 } = getTaskCoordinates(dep.dependent);
+          const containerX = Math.min(toX1, taskX1) - 300;
+          const containerWidth = Math.max(toX2, taskX2) - containerX + 300;
 
-              if (addedDependenciesAtDependent[taskId]) {
-                return;
-              }
-
-              addedDependenciesAtDependent[taskId] = true;
-
-              const criticalPathForTask = criticalPathOnLevel
-                ? criticalPathOnLevel.dependencies.get(dependent.id)
-                : undefined;
-
-              const isCritical = criticalPathForTask
-                ? criticalPathForTask.has(task.id)
-                : false;
-
-              const { x1: toX1, x2: toX2 } = getTaskCoordinates(dependent);
-
-              const containerX = Math.min(toX1, taskX1) - 300;
-              const containerWidth = Math.max(toX2, taskX2) - containerX + 300;
-
-              arrowsRes.push(
-                <svg
-                  x={containerX + (additionalLeftSpace || 0)}
-                  y={containerY}
-                  width={containerWidth}
-                  height={containerHeight}
-                  key={`Arrow from ${taskId} to ${dependent.id} on ${comparisonLevel}`}
-                >
-                  <Arrow
-                    colorStyles={colorStyles}
-                    distances={distances}
-                    taskFrom={task}
-                    extremityFrom={ownTarget}
-                    fromX1={taskX1 - containerX}
-                    fromX2={taskX2 - containerX}
-                    fromY={innerFromY}
-                    taskTo={dependent}
-                    extremityTo={dependentTarget}
-                    toX1={toX1 - containerX}
-                    toX2={toX2 - containerX}
-                    toY={innerToY}
-                    marginBetweenTasks={marginBetweenTasks}
-                    fullRowHeight={fullRowHeight}
-                    taskHeight={taskHeight}
-                    isShowDependencyWarnings={isShowDependencyWarnings}
-                    isCritical={isCritical}
-                    rtl={rtl}
-                    onArrowDoubleClick={onArrowDoubleClick}
-                    onArrowClick={onArrowClick}
-                    handleFixDependency={handleFixDependency}
-                  />
-                </svg>
-              );
-            }
+          arrowsRes.push(
+            <svg
+              className="ArrowClassName"
+              x={containerX + additionalLeftSpace}
+              y={dep.containerY}
+              width={containerWidth}
+              height={dep.containerHeight}
+              key={`Arrow from ${taskId} to ${dep.dependent.id} on ${comparisonLevel}`}
+            >
+              <Arrow
+                colorStyles={colorStyles}
+                distances={distances}
+                taskFrom={task}
+                extremityFrom={dep.ownTarget}
+                fromX1={taskX1 - containerX}
+                fromX2={taskX2 - containerX}
+                fromY={dep.innerFromY}
+                taskTo={dep.dependent}
+                extremityTo={dep.dependentTarget}
+                toX1={toX1 - containerX}
+                toX2={toX2 - containerX}
+                toY={dep.innerToY}
+                marginBetweenTasks={dep.marginBetweenTasks}
+                fullRowHeight={fullRowHeight}
+                taskHeight={taskHeight}
+                isShowDependencyWarnings={isShowDependencyWarnings}
+                isCritical={isDepCritical}
+                rtl={rtl}
+                onArrowDoubleClick={onArrowDoubleClick}
+                onArrowClick={onArrowClick}
+                handleFixDependency={handleFixDependency}
+              />
+            </svg>
           );
+        });
       }
     }
 
@@ -459,6 +365,8 @@ export const TaskGanttContent: React.FC<TaskGanttContentProps> = ({
     selectTaskOnMouseDown,
     selectedIdsMirror,
     visibleTasksMirror,
+    rowIndexToTasksMap,
+    enableTaskGrouping
   ]);
 
   return (

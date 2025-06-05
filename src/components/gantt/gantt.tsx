@@ -431,7 +431,7 @@ export const Gantt: React.FC<GanttProps> = ({
 
   const renderedRowIndexes = enableTaskGrouping
     ? useGroupedVirtualization(
-      ganttTaskContentRef,
+      //ganttTaskContentRef,
       rowIndexToTasksMap,
       fullRowHeight
     )
@@ -1846,6 +1846,8 @@ export const Gantt: React.FC<GanttProps> = ({
 
   const barProps: TaskGanttContentProps = useMemo(
     () => ({
+      enableTaskGrouping,
+      rowIndexToTasksMap,
       authorizedRelations,
       additionalLeftSpace,
       additionalRightSpace,
@@ -1895,6 +1897,8 @@ export const Gantt: React.FC<GanttProps> = ({
     [
       additionalLeftSpace,
       additionalRightSpace,
+      enableTaskGrouping,
+      rowIndexToTasksMap,
       checkIsHoliday,
       childOutOfParentWarnings,
       childTasksMap,

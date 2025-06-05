@@ -244,16 +244,8 @@ export const getMapTaskToCoordinatesWithGrouping = (
     }
 
     const { id, comparisonLevel = 1 } = task;
-
     if (!visibleTasksMirror[id]) {
-      return;
-    }
-    const parent = tasks.find((task) => task.id === task.parent);
 
-    const isGroupedChildOfCollapsedUser =
-      parent && parent.type === "user" && parent.hideChildren === true;
-
-    if (isGroupedChildOfCollapsedUser) {
       return;
     }
 
@@ -270,10 +262,12 @@ export const getMapTaskToCoordinatesWithGrouping = (
       svgWidth
     );
 
+
     const resByLevel =
       res.get(comparisonLevel) || new Map<string, TaskCoordinates>();
     resByLevel.set(id, taskCoordinates);
     res.set(comparisonLevel, resByLevel);
+
   });
 
   return res;
