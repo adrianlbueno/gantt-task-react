@@ -84,21 +84,27 @@ const calculateVisibleRange = (
         atEnd: scrollTop + clientHeight >= cumulative,
         clientHeight
     };
-};
+#};
 */}
 
-
 export const useGroupedVirtualization = (
-    //containerRef: RefObject<HTMLElement>,
     rowIndexToTasksMap: RowIndexToTasksMap,
     taskHeight: number
 ): OptimizedListParams => {
-    const rowEntries = useMemo(() =>
-        buildRowEntries(rowIndexToTasksMap, taskHeight),
-        [rowIndexToTasksMap, taskHeight]
-    );
+    const rowEntries = useMemo(() => {
+        const rowToHeight = new Map<number, number>();
+        for (const levelMap of rowIndexToTasksMap.values()) {
+            for (const [rowIndex, tasks] of levelMap.entries()) {
+                const height = tasks.length * (taskHeight + 2); // spacing
+                rowToHeight.set(rowIndex, (rowToHeight.get(rowIndex) ?? 0) + height);
+            }
+        }
 
-    // 👇 full visible range (no virtualization)
+        return [...rowToHeight.entries()]
+            .map(([rowIndex, height]) => ({ rowIndex, height }))
+            .sort((a, b) => a.rowIndex - b.rowIndex);
+    }, [rowIndexToTasksMap, taskHeight]);
+
     return [
         rowEntries[0]?.rowIndex ?? 0,
         rowEntries[rowEntries.length - 1]?.rowIndex ?? 0,
