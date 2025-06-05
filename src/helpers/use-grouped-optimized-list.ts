@@ -24,6 +24,8 @@ const getScrollMetrics = (el: HTMLElement | null): ScrollMetrics => {
     }
 }
 */
+
+/*
 const buildRowEntries = (
     rowIndexToTasksMap: RowIndexToTasksMap,
     taskHeight: number
@@ -42,7 +44,8 @@ const buildRowEntries = (
             height: count * (taskHeight + TASK_SPACING)
         }))
         .sort((a, b) => a.rowIndex - b.rowIndex)
-}
+}*/
+
 {/*
 const calculateVisibleRange = (
     entries: RowEntry[],
