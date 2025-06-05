@@ -1,6 +1,6 @@
 {
   "name": "@thepocman/gantt-task-react",
-  "version": "1.0.15",
+  "version": "1.0.16",
   "description": "Fork of gantt-task-react with support for grouped tasks on a single row when collapsed",
   "author": "Adrian Bueno <adrianlbueno@users.noreply.github.com>",
   "homepage": "https://github.com/adrianlbueno/gantt-task-react#readme",
