@@ -129,17 +129,21 @@ const TaskListInner: React.FC<TaskListProps & TaskListHeaderActionsProps> = (
     onColumnResizeStart
   ] = useTableListResize(columnsProp, distances, onResizeColumn);
 
+  const groupedIndexes = useGroupedVirtualization(
+    taskListContentRef,
+    rowIndexToTasksMap,
+    distances.taskHeight
+  );
+
+  const optimizedIndexes = useOptimizedList(
+    taskListContentRef,
+    "scrollTop",
+    fullRowHeight
+  );
+
   const renderedIndexes = enableTaskGrouping
-    ? useGroupedVirtualization(
-      taskListContentRef,
-      rowIndexToTasksMap,
-      distances.taskHeight
-    )
-    : useOptimizedList(
-      taskListContentRef,
-      "scrollTop",
-      fullRowHeight
-    );
+    ? groupedIndexes
+    : optimizedIndexes;
 
   return (
     <div className={styles.ganttTableRoot} ref={taskListRef}>

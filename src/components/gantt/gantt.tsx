@@ -428,18 +428,21 @@ export const Gantt: React.FC<GanttProps> = ({
   }, [enableTaskGrouping, rowIndexToTasksMap, maxLevelLength, fullRowHeight]);
 
 
+  const groupedIndexes = useGroupedVirtualization(
+    ganttTaskContentRef,
+    rowIndexToTasksMap,
+    fullRowHeight
+  );
+
+  const optimizedIndexes = useOptimizedList(
+    ganttTaskContentRef,
+    "scrollTop",
+    fullRowHeight
+  );
 
   const renderedRowIndexes = enableTaskGrouping
-    ? useGroupedVirtualization(
-      ganttTaskContentRef,
-      rowIndexToTasksMap,
-      fullRowHeight
-    )
-    : useOptimizedList(
-      ganttTaskContentRef,
-      "scrollTop",
-      fullRowHeight
-    );
+    ? groupedIndexes
+    : optimizedIndexes;
 
   const {
     checkHasCopyTasks,
