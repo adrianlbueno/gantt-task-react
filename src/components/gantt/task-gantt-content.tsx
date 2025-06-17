@@ -24,7 +24,8 @@ import {
   TaskCoordinates,
   TaskDependencyContextualPaletteProps,
   TaskOrEmpty,
-  TaskToHasDependencyWarningMap, TaskToRowIndexMap
+  TaskToHasDependencyWarningMap,
+  TaskToRowIndexMap,
 } from "../../types/public-types";
 import { Arrow } from "../other/arrow";
 import { RelationLine } from "../other/relation-line";
@@ -88,6 +89,13 @@ export type TaskGanttContentProps = {
   TaskDependencyContextualPalette?: React.FC<TaskDependencyContextualPaletteProps>;
 };
 
+
+export const generateRenderId = (task: TaskOrEmpty, index: number): string => {
+  if ('renderId' in task && typeof task.renderId === 'string') return task.renderId;
+  if ('type' in task && task.type === 'user') return `${task.id}-user`;
+  return `${task.id}-row-${index}`;
+};
+
 export const TaskGanttContent: React.FC<TaskGanttContentProps> = ({
   authorizedRelations,
   additionalLeftSpace,
@@ -132,11 +140,12 @@ export const TaskGanttContent: React.FC<TaskGanttContentProps> = ({
   visibleTasksMirror,
   taskToRowIndexMap,
 }) => {
+
+
   const [renderedTasks, renderedArrows, renderedSelectedTasks] = useMemo(() => {
     if (!renderedRowIndexes) return [null, null, null];
 
     const [start, end] = renderedRowIndexes;
-
     const tasksRes: ReactNode[] = [];
     const arrowsRes: ReactNode[] = [];
     const selectedTasksRes: ReactNode[] = [];
@@ -149,9 +158,11 @@ export const TaskGanttContent: React.FC<TaskGanttContentProps> = ({
 
       if (enableTaskGrouping) {
         for (let level = 1; level <= comparisonLevels; level++) {
+
           const levelMap = rowIndexToTasksMap.get(level);
           const rowTasks = levelMap?.get(index);
-          if (Array.isArray(rowTasks)) {
+
+          if (rowTasks) {
             tasksAtRow.push(...rowTasks);
           }
         }
@@ -159,92 +170,122 @@ export const TaskGanttContent: React.FC<TaskGanttContentProps> = ({
         const task = mapGlobalRowIndexToTask.get(index);
         if (task) tasksAtRow.push(task);
       }
-      console.log("tasksAtRow", tasksAtRow)
+
       for (const task of tasksAtRow) {
         const comparisonLevel = task.comparisonLevel ?? 1;
-        const { id: taskId } = task;
 
-        if (selectedIdsMirror[taskId] && !addedSelectedTasks[taskId]) {
-          addedSelectedTasks[taskId] = true;
+        const renderId = generateRenderId(task, index)
+        const taskId = task.id;
+        const rowIndex = taskToRowIndexMap.get(comparisonLevel)?.get(taskId);
 
-          const rowIndex = taskToRowIndexMap.get(comparisonLevel)?.get(taskId);
-          if (typeof rowIndex === "number") {
-            selectedTasksRes.push(
-              <rect
-                x={0}
-                y={rowIndex * fullRowHeight}
-                width="100%"
-                height={fullRowHeight}
-                fill={colorStyles.selectedTaskBackgroundColor}
-                key={`selected-${taskId}`}
-              />
-            );
-          }
+        if (typeof rowIndex !== "number") continue;
+
+        const key = `${taskId}-${rowIndex}`;
+
+        if (selectedIdsMirror[taskId] && !addedSelectedTasks[`${taskId}-${rowIndex}`]) {
+          addedSelectedTasks[key] = true;
+
+          selectedTasksRes.push(
+            <rect
+              x={0}
+              y={rowIndex * fullRowHeight}
+              width="100%"
+              height={fullRowHeight}
+              fill={colorStyles.selectedTaskBackgroundColor}
+              key={`selected-${key}`}
+            />
+          );
         }
 
         if (comparisonLevel > comparisonLevels) continue;
+
         if (task.type === "empty" || task.type === "user") continue;
 
-        const key = `${comparisonLevel}_${task.id}`;
         const criticalPathOnLevel = criticalPaths?.get(comparisonLevel);
         const isCritical = !!criticalPathOnLevel?.tasks.has(task.id);
 
         const {
-          containerX, containerWidth, innerX1, innerX2, width, levelY,
-          progressWidth, x1: taskX1, x2: taskX2
+          containerX,
+          containerWidth,
+          innerX1,
+          innerX2,
+          width,
+          levelY,
+          progressWidth,
+          x1: taskX1,
+          x2: taskX2,
         } = getTaskCoordinates(task);
 
-        tasksRes.push(
-          <svg
-            id={task.id}
-            className="TaskItemClassName"
-            x={containerX + additionalLeftSpace}
-            y={levelY}
-            width={containerWidth}
-            height={fullRowHeight}
-            key={key}
-          >
-            <TaskItem
-              getTaskGlobalIndexByRef={getTaskGlobalIndexByRef}
-              hasChildren={checkHasChildren(task, childTasksMap)}
-              hasDependencyWarning={
-                taskToHasDependencyWarningMap
-                  ? checkTaskHasDependencyWarning(task, taskToHasDependencyWarningMap)
-                  : false
-              }
-              progressWidth={progressWidth}
-              progressX={rtl ? innerX2 : innerX1}
-              selectTaskOnMouseDown={selectTaskOnMouseDown}
-              task={task}
-              taskYOffset={taskYOffset}
-              width={width}
-              x1={innerX1}
-              x2={innerX2}
-              childOutOfParentWarnings={childOutOfParentWarnings}
-              distances={distances}
-              taskHeight={taskHeight}
-              taskHalfHeight={taskHalfHeight}
-              isProgressChangeable={!task.isDisabled}
-              isDateChangeable={!task.isDisabled}
-              isRelationChangeable={!task.isRelationDisabled}
-              authorizedRelations={authorizedRelations}
-              ganttRelationEvent={ganttRelationEvent}
-              isDelete={!task.isDisabled}
-              onDoubleClick={onDoubleClick}
-              onClick={onClick}
-              onEventStart={handleTaskDragStart}
-              setTooltipTask={setTooltipTask}
-              onRelationStart={handleBarRelationStart}
-              isSelected={Boolean(selectedIdsMirror[taskId])}
-              isCritical={isCritical}
-              rtl={rtl}
-              fixStartPosition={fixStartPosition}
-              fixEndPosition={fixEndPosition}
-              handleDeleteTasks={handleDeleteTasks}
-              colorStyles={colorStyles}
-            />
-          </svg>
-        );
+        const renderContexts = [];
+        const oneRowDefaultRender = { y: levelY, keySuffix: "default" }
+
+        renderContexts.push(oneRowDefaultRender);
+
+        if (enableTaskGrouping && task.parent) {
+          const parentRowIndex = taskToRowIndexMap.get(comparisonLevel)?.get(task.parent);
+
+          if (typeof parentRowIndex === "number") {
+
+            const yInUserRow = parentRowIndex * fullRowHeight;
+
+            renderContexts.push({ y: yInUserRow, keySuffix: "grouped" });
+          }
+        }
+
+        for (const context of renderContexts) {
+
+          tasksRes.push(
+            <svg
+              id={`${renderId}-${context.keySuffix}`}
+              className="TaskItemClassName"
+              x={containerX + additionalLeftSpace}
+              y={context.y}
+              width={containerWidth}
+              height={fullRowHeight}
+              key={`${comparisonLevel}_${task.id}_${index}_${context.keySuffix}`}
+            >
+              <TaskItem
+                getTaskGlobalIndexByRef={getTaskGlobalIndexByRef}
+                hasChildren={checkHasChildren(task, childTasksMap)}
+                hasDependencyWarning={
+                  taskToHasDependencyWarningMap
+                    ? checkTaskHasDependencyWarning(task, taskToHasDependencyWarningMap)
+                    : false
+                }
+                progressWidth={progressWidth}
+                progressX={rtl ? innerX2 : innerX1}
+                selectTaskOnMouseDown={selectTaskOnMouseDown}
+                task={task}
+                taskYOffset={taskYOffset}
+                width={width}
+                x1={innerX1}
+                x2={innerX2}
+                childOutOfParentWarnings={childOutOfParentWarnings}
+                distances={distances}
+                taskHeight={taskHeight}
+                taskHalfHeight={taskHalfHeight}
+                isProgressChangeable={!task.isDisabled}
+                isDateChangeable={!task.isDisabled}
+                isRelationChangeable={!task.isRelationDisabled}
+                authorizedRelations={authorizedRelations}
+                ganttRelationEvent={ganttRelationEvent}
+                isDelete={!task.isDisabled}
+                onDoubleClick={onDoubleClick}
+                onClick={onClick}
+                onEventStart={handleTaskDragStart}
+                setTooltipTask={setTooltipTask}
+                onRelationStart={handleBarRelationStart}
+                isSelected={Boolean(selectedIdsMirror[taskId])}
+                isCritical={isCritical}
+                rtl={rtl}
+                fixStartPosition={fixStartPosition}
+                fixEndPosition={fixEndPosition}
+                handleDeleteTasks={handleDeleteTasks}
+                colorStyles={colorStyles}
+              />
+            </svg>
+          );
+        }
 
         const addedDependenciesAtLevel = addedDependencies[comparisonLevel] ??= {};
         const addedDependenciesAtTask = addedDependenciesAtLevel[taskId] ??= {};
@@ -252,7 +293,8 @@ export const TaskGanttContent: React.FC<TaskGanttContentProps> = ({
         const dependenciesAtLevel = dependencyMap.get(comparisonLevel);
         const dependenciesByTask = dependenciesAtLevel?.get(taskId);
 
-        dependenciesByTask?.filter(({ source }) => visibleTasksMirror[source.id]).forEach(dep => {
+        dependenciesByTask?.forEach(dep => {
+          if (!visibleTasksMirror[dep.source.id]) return;
           if (addedDependenciesAtTask[dep.source.id]) return;
           addedDependenciesAtTask[dep.source.id] = true;
 
@@ -268,7 +310,7 @@ export const TaskGanttContent: React.FC<TaskGanttContentProps> = ({
               y={dep.containerY}
               width={containerWidth}
               height={dep.containerHeight}
-              key={`Arrow from ${dep.source.id} to ${taskId} on ${comparisonLevel}`}
+              key={`Arrow from ${dep.source.id} to ${taskId} on ${comparisonLevel} at ${index}`}
             >
               <Arrow
                 colorStyles={colorStyles}
@@ -300,10 +342,10 @@ export const TaskGanttContent: React.FC<TaskGanttContentProps> = ({
         const dependentsAtLevel = dependentMap.get(comparisonLevel);
         const dependentsByTask = dependentsAtLevel?.get(taskId);
 
-        dependentsByTask?.filter(({ dependent }) => visibleTasksMirror[dependent.id]).forEach(dep => {
-          console.log("dependent", dep)
-          const addedDepsForDep = addedDependenciesAtLevel[dep.dependent.id] ??= {};
+        dependentsByTask?.forEach(dep => {
+          if (!visibleTasksMirror[dep.dependent.id]) return;
 
+          const addedDepsForDep = addedDependenciesAtLevel[dep.dependent.id] ??= {};
           if (addedDepsForDep[taskId]) return;
           addedDepsForDep[taskId] = true;
 
@@ -319,7 +361,7 @@ export const TaskGanttContent: React.FC<TaskGanttContentProps> = ({
               y={dep.containerY}
               width={containerWidth}
               height={dep.containerHeight}
-              key={`Arrow from ${taskId} to ${dep.dependent.id} on ${comparisonLevel}`}
+              key={`Arrow from ${taskId} to ${dep.dependent.id} on ${comparisonLevel} at ${index}`}
             >
               <Arrow
                 colorStyles={colorStyles}
@@ -349,7 +391,7 @@ export const TaskGanttContent: React.FC<TaskGanttContentProps> = ({
         });
       }
     }
-
+    //console.log("tasksRes---------", tasksRes)
     return [tasksRes, arrowsRes, selectedTasksRes];
   }, [
     additionalLeftSpace,
@@ -366,13 +408,12 @@ export const TaskGanttContent: React.FC<TaskGanttContentProps> = ({
     selectedIdsMirror,
     visibleTasksMirror,
     rowIndexToTasksMap,
-    enableTaskGrouping
+    enableTaskGrouping,
   ]);
 
   return (
     <g className="content">
       {renderedSelectedTasks}
-
       <g
         className="arrows"
         fill={colorStyles.arrowColor}
@@ -380,11 +421,9 @@ export const TaskGanttContent: React.FC<TaskGanttContentProps> = ({
       >
         {renderedArrows}
       </g>
-
       <g className="bar" fontFamily={fontFamily} fontSize={fontSize}>
         {renderedTasks}
       </g>
-
       {ganttRelationEvent && (
         <RelationLine
           x1={ganttRelationEvent.startX}

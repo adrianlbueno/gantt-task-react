@@ -1,17 +1,18 @@
-import React, {useCallback} from "react";
 import type { ReactNode } from "react";
+import React, { useCallback } from "react";
 
-import {
-  DateSetup,
-  ViewMode,
-  RenderTopHeader,
-  RenderBottomHeader,
-  Distances, ColorStyles
-} from "../../types/public-types";
-import { TopPartOfCalendar } from "./top-part-of-calendar";
 import { getDaysInMonth } from "../../helpers/date-helper";
+import {
+  ColorStyles,
+  DateSetup,
+  Distances,
+  RenderBottomHeader,
+  RenderTopHeader,
+  ViewMode
+} from "../../types/public-types";
 import { defaultRenderBottomHeader } from "./default-render-bottom-header";
 import { defaultRenderTopHeader } from "./default-render-top-header";
+import { TopPartOfCalendar } from "./top-part-of-calendar";
 
 import styles from "./calendar.module.css";
 
@@ -323,7 +324,7 @@ export const Calendar: React.FC<CalendarProps> = ({
             xText={
               additionalLeftSpace +
               columnWidth *
-                (startIndexOrZero + (endIndex - startIndexOrZero) / 2)
+              (startIndexOrZero + (endIndex - startIndexOrZero) / 2)
             }
             yText={topDefaultHeight * 0.9}
             colors={colors}

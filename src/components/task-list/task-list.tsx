@@ -16,6 +16,7 @@ import {
   TaskListHeaderProps,
   TaskListTableProps,
   TaskOrEmpty,
+  TaskToRowIndexMap
 } from "../../types/public-types";
 
 import { useOptimizedList } from "../../helpers/use-optimized-list";
@@ -57,7 +58,8 @@ export type TaskListProps = {
   ) => void;
   icons?: Partial<Icons>;
   isShowTaskNumbers: boolean;
-  rowIndexToTasksMap: RowIndexToTasksMap
+  rowIndexToTasksMap: RowIndexToTasksMap;
+  taskToRowIndexMap: TaskToRowIndexMap
   mapTaskToNestedIndex: MapTaskToNestedIndex;
   onClick?: (task: TaskOrEmpty) => void;
   onExpanderClick: (task: Task) => void;
@@ -88,6 +90,7 @@ const TaskListInner: React.FC<TaskListProps & TaskListHeaderActionsProps> = (
     dependencyMap,
     distances,
     rowIndexToTasksMap,
+    taskToRowIndexMap,
     fontFamily,
     fontSize,
     fullRowHeight,
@@ -132,7 +135,8 @@ const TaskListInner: React.FC<TaskListProps & TaskListHeaderActionsProps> = (
   const groupedIndexes = useGroupedVirtualization(
     taskListContentRef,
     rowIndexToTasksMap,
-    distances.taskHeight
+    distances.taskHeight,
+    taskToRowIndexMap
   );
 
   const optimizedIndexes = useOptimizedList(

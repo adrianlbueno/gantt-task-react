@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import type { RowIndexToTasksMap } from "../types/public-types";
+import type { RowIndexToTasksMap, TaskToRowIndexMap } from "../types/public-types";
 import type { OptimizedListParams } from "./use-optimized-list";
 
 const TASK_SPACING = 2;
@@ -12,16 +12,21 @@ interface RowEntry {
 export const useGroupedVirtualization = (
     _containerRef: React.RefObject<HTMLElement>,
     rowIndexToTasksMap: RowIndexToTasksMap,
-    taskHeight: number
+    taskHeight: number,
+    taskToRowIndexMap: TaskToRowIndexMap
 ): OptimizedListParams => {
+
     const rowEntries: RowEntry[] = useMemo(() => {
         if (!rowIndexToTasksMap || rowIndexToTasksMap.size === 0) return [];
+        if (!taskToRowIndexMap || taskToRowIndexMap.size === 0) return [];
 
         const rowToHeight = new Map<number, number>();
 
         for (const levelMap of rowIndexToTasksMap.values()) {
             for (const [rowIndex, tasks] of levelMap.entries()) {
-                const height = tasks.length * (taskHeight + TASK_SPACING);
+                const visibleGroupedTasks = tasks.filter(task => !taskToRowIndexMap.get(task.comparisonLevel ?? 1)?.has(task.id));
+                const height = visibleGroupedTasks.length * (taskHeight + TASK_SPACING);
+
                 rowToHeight.set(rowIndex, (rowToHeight.get(rowIndex) ?? 0) + height);
             }
         }
@@ -31,7 +36,6 @@ export const useGroupedVirtualization = (
             .sort((a, b) => a.rowIndex - b.rowIndex);
     }, [rowIndexToTasksMap, taskHeight]);
 
-    // 🛡️ Fallback for empty entries
     if (!rowEntries || rowEntries.length === 0) {
         return [0, 0, true, true, 0];
     }

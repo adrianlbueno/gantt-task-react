@@ -431,7 +431,8 @@ export const Gantt: React.FC<GanttProps> = ({
   const groupedIndexes = useGroupedVirtualization(
     ganttTaskContentRef,
     rowIndexToTasksMap,
-    fullRowHeight
+    fullRowHeight,
+    taskToRowIndexMap,
   );
 
   const optimizedIndexes = useOptimizedList(
@@ -1957,6 +1958,7 @@ export const Gantt: React.FC<GanttProps> = ({
     TaskListTable,
     enableTaskGrouping,
     rowIndexToTasksMap,
+    taskToRowIndexMap,
     canMoveTasks,
     canResizeColumns,
     childTasksMap,

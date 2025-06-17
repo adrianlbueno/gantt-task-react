@@ -19,12 +19,11 @@ const collectChildren = (
     mirrorRes[task.id] = true;
   }
 
-  if (
-    task.type === "empty" ||
-    (enableTaskGrouping
-      ? task.hideChildren && task.type !== "user"
-      : task.hideChildren)
-  ) {
+  const isTaskGroupingEnabled = enableTaskGrouping
+    ? task.hideChildren && task.type !== "user"
+    : task.hideChildren
+
+  if (task.type === "empty" || isTaskGroupingEnabled) {
     return;
   }
 

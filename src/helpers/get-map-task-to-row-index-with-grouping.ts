@@ -1,4 +1,10 @@
-import { GlobalRowIndexToTaskMap, RowIndexToTaskMap, RowIndexToTasksMap, TaskOrEmpty, TaskToRowIndexMap } from "../types/public-types";
+import {
+  GlobalRowIndexToTaskMap,
+  RowIndexToTaskMap,
+  RowIndexToTasksMap,
+  TaskOrEmpty,
+  TaskToRowIndexMap
+} from "../types/public-types";
 
 export const getMapTaskToRowIndexWithGrouping = (
   tasks: readonly TaskOrEmpty[],
@@ -14,64 +20,52 @@ export const getMapTaskToRowIndexWithGrouping = (
   const rowIndexToTaskMap = new Map<number, Map<number, TaskOrEmpty>>();
   const rowIndexToTasksMap = new Map<number, Map<number, TaskOrEmpty[]>>();
   const mapGlobalRowIndexToTask = new Map<number, TaskOrEmpty>();
+  const parentMap = new Map(tasks.map(t => [t.id, t]));
+  const rowCounterPerLevel: Record<number, number> = {};
 
-  const parentMap = new Map(tasks.map((t) => [t.id, t]));
+  for (let level = 1; level <= comparisonLevels; level++) {
+    taskToRowIndexMap.set(level, new Map());
+    rowIndexToTaskMap.set(level, new Map());
+    rowIndexToTasksMap.set(level, new Map());
+    rowCounterPerLevel[level] = 0;
+  }
 
-  let globalRowIndex = 0;
+  for (const task of tasks) {
+    const comparisonLevel = task.comparisonLevel ?? 1;
+    const rowIndex = rowCounterPerLevel[comparisonLevel];
 
-  for (let comparisonLevel = 1; comparisonLevel <= comparisonLevels; comparisonLevel++) {
-    const taskToRow = new Map<string, number>();
-    const rowToTask = new Map<number, TaskOrEmpty>();
-    const rowToTasks = new Map<number, TaskOrEmpty[]>();
+    const taskToRow = taskToRowIndexMap.get(comparisonLevel)!;
+    const rowToTask = rowIndexToTaskMap.get(comparisonLevel)!;
+    const rowToTasks = rowIndexToTasksMap.get(comparisonLevel)!;
 
-    taskToRowIndexMap.set(comparisonLevel, taskToRow);
-    rowIndexToTaskMap.set(comparisonLevel, rowToTask);
-    rowIndexToTasksMap.set(comparisonLevel, rowToTasks);
+    const { id, parent } = task;
+    const parentTask = parent ? parentMap.get(parent) : null;
 
-    let rowIndex = 0;
+    if (
+      isGrouped &&
+      comparisonLevel === 1 &&
+      parent &&
+      parentTask &&
+      parentTask.hideChildren
+    ) {
+      const parentRow = taskToRow.get(parent);
 
-    for (const task of tasks) {
-      if ((task.comparisonLevel ?? 1) !== comparisonLevel) continue;
-
-      const { id, parent, type } = task;
-
-      let assignedRowIndex = rowIndex;
-
-      // Always assign a row for user/group header tasks
-      if (type === "user" || type === "project") {
-        taskToRow.set(id, rowIndex);
-        rowToTask.set(rowIndex, task);
-        rowToTasks.set(rowIndex, [task]);
-        mapGlobalRowIndexToTask.set(globalRowIndex, task);
-
-        rowIndex++;
-        globalRowIndex++;
-        continue; // skip the rest of the loop
+      if (parentRow !== undefined) {
+        const existing = rowToTasks.get(parentRow) ?? [];
+        rowToTasks.set(parentRow, [...existing, task]);
+        taskToRow.set(id, parentRow);
+        continue;
       }
-
-      // Handle grouping logic for children
-      if (isGrouped && parent) {
-        const parentTask = parentMap.get(parent);
-        const parentRowIndex = taskToRow.get(parent);
-
-        if (parentTask?.hideChildren && parentRowIndex !== undefined) {
-          assignedRowIndex = parentRowIndex;
-        } else {
-          assignedRowIndex = rowIndex;
-          rowIndex++;
-        }
-      } else {
-        assignedRowIndex = rowIndex;
-        rowIndex++;
-      }
-
-      taskToRow.set(id, assignedRowIndex);
-      rowToTask.set(assignedRowIndex, task);
-      const existing = rowToTasks.get(assignedRowIndex) ?? [];
-      rowToTasks.set(assignedRowIndex, [...existing, task]);
-      mapGlobalRowIndexToTask.set(globalRowIndex, task);
-      globalRowIndex++;
     }
+
+    taskToRow.set(id, rowIndex);
+    rowToTask.set(rowIndex, task);
+    rowToTasks.set(rowIndex, [task]);
+
+    const globalIndex = rowIndex * comparisonLevels + (comparisonLevel - 1);
+    mapGlobalRowIndexToTask.set(globalIndex, task);
+
+    rowCounterPerLevel[comparisonLevel]++;
   }
 
   return [

@@ -52,15 +52,18 @@ export const Comparison: React.FC = props => {
   }, []);
 
   return (
-    <Gantt
-      {...props}
-      enableTaskGrouping={true}
-      onAddTask={onAddTask}
-      onChangeTasks={onChangeTasks}
-      onDoubleClick={handleDblClick}
-      onEditTask={onEditTask}
-      onClick={handleClick}
-      tasks={tasks}
-    />
+    <div>
+      <Gantt
+        {...props}
+        enableTaskGrouping={true}
+        comparisonLevels={1}
+        onAddTask={onAddTask}
+        onChangeTasks={onChangeTasks}
+        onDoubleClick={handleDblClick}
+        onEditTask={onEditTask}
+        onClick={handleClick}
+        tasks={tasks}
+      />
+    </div>
   );
 };

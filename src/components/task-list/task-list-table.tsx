@@ -40,13 +40,12 @@ const TaskListTableDefaultInner: React.FC<TaskListTableProps> = ({
   selectedIdsMirror,
   tasks,
 }) => {
-
   const renderedTasks = useMemo(() => {
     if (!enableTaskGrouping) {
       return tasks.filter((task) => !task.comparisonLevel || task.comparisonLevel === 1);
     }
 
-    return tasks.filter(task => task.type !== "user"); // render all non-user tasks
+    return tasks.filter(task => task.type !== "user");
   }, [tasks, enableTaskGrouping]);
 
 
@@ -107,26 +106,31 @@ const TaskListTableDefaultInner: React.FC<TaskListTableProps> = ({
         );
       }
     } else {
-
+      const seen = new Set<string>();
 
       for (let rowIndex = start; rowIndex <= end; rowIndex++) {
 
         const taskList = rowIndexToTasksMap.get(1)?.get(rowIndex);
+
         if (!taskList) continue;
 
         for (const task of taskList) {
           const parent = tasks.find(t => t.id === task.parent);
+
           if (parent?.hideChildren) continue;
+
+
+          if (seen.has(task.id)) continue;
+          seen.add(task.id)
 
           const { id, comparisonLevel } = task;
           let depth = 0;
           let indexStr = "";
-          console.log("comparisonLevel", comparisonLevel)
+
           const levelMap = mapTaskToNestedIndex.get(comparisonLevel);
           const taskIndex = levelMap?.get(id);
-          if (taskIndex) {
 
-            console.log('object :>> ', [depth, indexStr] = taskIndex);
+          if (taskIndex) {
             [depth, indexStr] = taskIndex;
           }
 
