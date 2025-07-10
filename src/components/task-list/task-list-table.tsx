@@ -121,12 +121,10 @@ const TaskListTableDefaultInner: React.FC<TaskListTableProps> = ({
           const { id, comparisonLevel } = task;
           let depth = 0;
           let indexStr = "";
-          console.log("comparisonLevel", comparisonLevel)
           const levelMap = mapTaskToNestedIndex.get(comparisonLevel);
           const taskIndex = levelMap?.get(id);
-          if (taskIndex) {
 
-            console.log('object :>> ', [depth, indexStr] = taskIndex);
+          if (taskIndex) {
             [depth, indexStr] = taskIndex;
           }
 

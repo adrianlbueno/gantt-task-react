@@ -151,15 +151,16 @@ export const TaskGanttContent: React.FC<TaskGanttContentProps> = ({
         for (let level = 1; level <= comparisonLevels; level++) {
           const levelMap = rowIndexToTasksMap.get(level);
           const rowTasks = levelMap?.get(index);
+
           if (Array.isArray(rowTasks)) {
             tasksAtRow.push(...rowTasks);
           }
+
         }
       } else {
         const task = mapGlobalRowIndexToTask.get(index);
         if (task) tasksAtRow.push(task);
       }
-      console.log("tasksAtRow", tasksAtRow)
       for (const task of tasksAtRow) {
         const comparisonLevel = task.comparisonLevel ?? 1;
         const { id: taskId } = task;

@@ -1947,8 +1947,6 @@ export const Gantt: React.FC<GanttProps> = ({
     ]
   );
 
-  //console.log("rowIndexToTasksMap testinnggggggggggggg", rowIndexToTasksMap)
-
   const tableProps: TaskListProps = {
     TaskListHeader,
     TaskListTable,
