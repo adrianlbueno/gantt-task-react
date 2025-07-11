@@ -16,6 +16,7 @@ import {
   TaskListHeaderProps,
   TaskListTableProps,
   TaskOrEmpty,
+  TaskToRowIndexMap
 } from "../../types/public-types";
 
 import { useOptimizedList } from "../../helpers/use-optimized-list";
@@ -57,7 +58,8 @@ export type TaskListProps = {
   ) => void;
   icons?: Partial<Icons>;
   isShowTaskNumbers: boolean;
-  rowIndexToTasksMap: RowIndexToTasksMap
+  rowIndexToTasksMap: RowIndexToTasksMap;
+  taskToRowIndexMap: TaskToRowIndexMap
   mapTaskToNestedIndex: MapTaskToNestedIndex;
   onClick?: (task: TaskOrEmpty) => void;
   onExpanderClick: (task: Task) => void;
@@ -129,17 +131,21 @@ const TaskListInner: React.FC<TaskListProps & TaskListHeaderActionsProps> = (
     onColumnResizeStart
   ] = useTableListResize(columnsProp, distances, onResizeColumn);
 
+  const groupedIndexes = useGroupedVirtualization(
+    taskListContentRef,
+    rowIndexToTasksMap,
+    distances.taskHeight,
+  );
+
+  const optimizedIndexes = useOptimizedList(
+    taskListContentRef,
+    "scrollTop",
+    fullRowHeight
+  );
+
   const renderedIndexes = enableTaskGrouping
-    ? useGroupedVirtualization(
-      taskListContentRef,
-      rowIndexToTasksMap,
-      distances.taskHeight
-    )
-    : useOptimizedList(
-      taskListContentRef,
-      "scrollTop",
-      fullRowHeight
-    );
+    ? groupedIndexes
+    : optimizedIndexes;
 
   return (
     <div className={styles.ganttTableRoot} ref={taskListRef}>

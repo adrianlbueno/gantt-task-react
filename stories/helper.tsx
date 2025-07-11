@@ -32,7 +32,7 @@ export function initTasksUser(): TaskOrEmpty[] {
       type: "task",
       name: "Audit 2 last in the list",
       start: new Date(currentDate.getFullYear(), currentDate.getMonth(), 15),
-      end: new Date(currentDate.getFullYear(), currentDate.getMonth(), 15),
+      end: new Date(currentDate.getFullYear(), currentDate.getMonth(), 11),
       progress: 50,
       parent: "user-1",
     },
@@ -97,12 +97,11 @@ export function initTasksUser(): TaskOrEmpty[] {
       end: new Date(currentDate.getFullYear(), currentDate.getMonth(), 15),
       progress: 70,
       displayOrder: 4,
-      hideChildren: false
     },
     {
       id: "user-cool",
       type: "user",
-      name: "Tester Bueno",
+      name: "Tester Bueno one",
       hideChildren: true,
     },
     {
@@ -113,13 +112,12 @@ export function initTasksUser(): TaskOrEmpty[] {
       end: new Date(currentDate.getFullYear(), currentDate.getMonth(), 15),
       progress: 70,
       displayOrder: 4,
-      hideChildren: false,
       parent: "user-cool"
     },
     {
       id: "user-cooler",
       type: "user",
-      name: "Tester Bueno",
+      name: "Tester Bueno two",
       hideChildren: true,
     },
     {
@@ -130,13 +128,12 @@ export function initTasksUser(): TaskOrEmpty[] {
       end: new Date(currentDate.getFullYear(), currentDate.getMonth(), 15),
       progress: 70,
       displayOrder: 4,
-      hideChildren: false,
       parent: "user-cooler"
     },
     {
       id: "user-coolerer",
       type: "user",
-      name: "Tester Bueno",
+      name: "Tester Bueno three",
       hideChildren: true,
     },
     {
@@ -147,7 +144,6 @@ export function initTasksUser(): TaskOrEmpty[] {
       end: new Date(currentDate.getFullYear(), currentDate.getMonth(), 15),
       progress: 70,
       displayOrder: 4,
-      hideChildren: false,
       parent: "user-coolerer"
     },
     {
@@ -164,7 +160,6 @@ export function initTasksUser(): TaskOrEmpty[] {
       end: new Date(currentDate.getFullYear(), currentDate.getMonth(), 15),
       progress: 70,
       displayOrder: 4,
-      hideChildren: false,
       parent: "user-adrian"
     },
     {

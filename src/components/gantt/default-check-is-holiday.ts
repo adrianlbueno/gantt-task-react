@@ -24,10 +24,10 @@ export const defaultCheckIsHoliday = (
     const rest = daysDiff % 7;
 
     if (daysDiff >= 0) {
-      return rest === 5 || rest === 6; 
+      return rest === 5 || rest === 6;
     }
 
-    return rest === -1 || rest === -2; 
+    return rest === -1 || rest === -2;
   }
 
   return isWeekend(date);

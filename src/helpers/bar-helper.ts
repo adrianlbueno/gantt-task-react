@@ -4,8 +4,8 @@ import {
   TaskCoordinates,
   ViewMode,
 } from "../types/public-types";
-import { getDatesDiff } from "./get-dates-diff";
 import { getDateByOffset } from "./get-date-by-offset";
+import { getDatesDiff } from "./get-dates-diff";
 
 export const taskXCoordinate = (
   xDate: Date,
@@ -67,7 +67,7 @@ const dateByX = (
   let newDate = new Date(((x - taskX) / xStep) * timeStep + taskDate.getTime());
   newDate = new Date(
     newDate.getTime() +
-      (newDate.getTimezoneOffset() - taskDate.getTimezoneOffset()) * 60000
+    (newDate.getTimezoneOffset() - taskDate.getTimezoneOffset()) * 60000
   );
   return newDate;
 };

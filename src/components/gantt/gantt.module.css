@@ -56,7 +56,7 @@
 .wrapper {
   display: grid;
   overflow-x: hidden;
-  overflow-y: hidden;
+  overflow-y: auto;
   padding: 0;
   margin: 0;
   list-style: none;
