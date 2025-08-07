@@ -14,9 +14,17 @@ import subMonths from "date-fns/subMonths";
 import subWeeks from "date-fns/subWeeks";
 import subYears from "date-fns/subYears";
 
-import { startOfHalfYear } from "date-fns";
 import { TaskOrEmpty, ViewMode } from "../types/public-types";
 import { getDatesDiff } from "./get-dates-diff";
+
+
+//
+//Testing function, date-fns does not suport halfyear
+const startOfHalfYear = (date: Date | number): Date => {
+  const d = new Date(date);
+  const startMonth = d.getMonth() < 6 ? 0 : 6;
+  return new Date(d.getFullYear(), startMonth, 1);
+}
 
 export const ganttDateRange = (
   tasks: readonly TaskOrEmpty[],
