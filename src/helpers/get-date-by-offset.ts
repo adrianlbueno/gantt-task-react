@@ -1,11 +1,11 @@
 import addDays from "date-fns/addDays";
 import addHours from "date-fns/addHours";
 import addMonths from "date-fns/addMonths";
+import addQuarters from "date-fns/addQuarters";
 import addWeeks from "date-fns/addWeeks";
 import addYears from "date-fns/addYears";
-import addQuarters from "date-fns/addQuarters";
 
-import {ViewMode} from "../types/public-types";
+import { ViewMode } from "../types/public-types";
 
 export const getDateByOffset = (
   startDate: Date,
@@ -36,6 +36,9 @@ export const getDateByOffset = (
 
     case ViewMode.QuarterYear:
       return addQuarters(startDate, offset);
+
+    case ViewMode.HalfYear:
+      return addMonths(startDate, offset * 6);
 
     case ViewMode.Year:
       return addYears(startDate, offset);
