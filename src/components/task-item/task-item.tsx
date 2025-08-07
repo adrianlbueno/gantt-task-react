@@ -1,32 +1,32 @@
+import type { MouseEvent, MouseEventHandler } from "react";
 import React, {
   memo,
+  useCallback,
   useEffect,
+  useMemo,
   useRef,
   useState,
-  useMemo,
-  useCallback,
 } from "react";
-import type { MouseEvent, MouseEventHandler } from "react";
 
 import { GanttRelationEvent } from "../../types/gantt-task-actions";
 import {
-  ChildOutOfParentWarnings,
-  FixPosition,
-  Task,
-  ColorStyles,
-  TaskOrEmpty,
-  Distances,
-  RelationKind,
   BarMoveAction,
+  ChildOutOfParentWarnings,
+  ColorStyles,
   DateExtremity,
+  Distances,
+  FixPosition,
+  RelationKind,
+  Task,
+  TaskOrEmpty,
 } from "../../types/public-types";
+import { BarFixWidth, fixWidthContainerClass } from "../other/bar-fix-width";
 import { Bar } from "./bar/bar";
+import { BarRelationHandle } from "./bar/bar-relation-handle";
 import { BarSmall } from "./bar/bar-small";
 import { Milestone } from "./milestone/milestone";
-import { TaskWarning } from "./task-warning";
 import style from "./task-list.module.css";
-import { BarFixWidth, fixWidthContainerClass } from "../other/bar-fix-width";
-import { BarRelationHandle } from "./bar/bar-relation-handle";
+import { TaskWarning } from "./task-warning";
 
 export type TaskItemProps = {
   children?: React.ReactNode
@@ -68,6 +68,9 @@ export type TaskItemProps = {
   fixEndPosition?: FixPosition;
   handleDeleteTasks: (task: TaskOrEmpty[]) => void;
   colorStyles: ColorStyles;
+  //new props
+  enableTaskGrouping?: boolean;
+  getTaskInitials?: (task: Task) => string;
 };
 
 const TaskItemInner: React.FC<TaskItemProps> = props => {
@@ -394,7 +397,7 @@ const TaskItemInner: React.FC<TaskItemProps> = props => {
         }
         ref={textRef}
       >
-        {task.name}
+        {isTextInside ? task.name : ""}
       </text>
 
       {(outOfParentWarnings || hasDependencyWarning) && (

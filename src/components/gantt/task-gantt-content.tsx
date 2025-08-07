@@ -243,6 +243,14 @@ export const TaskGanttContent: React.FC<TaskGanttContentProps> = ({
               fixEndPosition={fixEndPosition}
               handleDeleteTasks={handleDeleteTasks}
               colorStyles={colorStyles}
+              enableTaskGrouping={enableTaskGrouping}
+              getTaskInitials={(task) => {
+                return task.name
+                  ?.split(" ")
+                  .map(word => word[0])
+                  .join("")
+                  .toUpperCase() ?? "";
+              }}
             />
           </svg>
         );
