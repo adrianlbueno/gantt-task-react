@@ -53,6 +53,7 @@ const TaskGanttInner: React.FC<TaskGanttProps> = (props) => {
     onScrollGanttContentVertically: onScrollVertically,
     colors
   } = props;
+
   const containerStyle: CSSProperties = {
     // In order to see the vertical scrollbar of the gantt content,
     // we resize dynamically the width of the gantt content
@@ -62,6 +63,7 @@ const TaskGanttInner: React.FC<TaskGanttProps> = (props) => {
       ganttTaskRootRef.current.scrollLeft
       : fullSvgWidth,
   };
+  console.log('containerStyle:>> ', containerStyle);
 
   const gridStyle = useMemo<CSSProperties>(
     () => ({

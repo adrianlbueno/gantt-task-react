@@ -1,10 +1,8 @@
 import React, { useCallback, useState } from "react";
-
-import { Gantt, OnChangeTasks, Task, TaskOrEmpty } from "../src";
-
-import { initTasksUser, onAddTask, onEditTask } from "./helper";
-
 import "../dist/style.css";
+import { ViewSwitcher } from "../example/src/components/view-switcher";
+import { Gantt, OnChangeTasks, Task, TaskOrEmpty, ViewMode } from "../src";
+import { initTasksUser, onAddTask, onEditTask } from "./helper";
 
 export const Comparison: React.FC = props => {
   const [tasks, setTasks] = useState<readonly TaskOrEmpty[]>(() => {
@@ -19,6 +17,8 @@ export const Comparison: React.FC = props => {
     return [...firstLevelTasks];
   });
 
+  const [viewMode, setViewMode] = useState<ViewMode>(ViewMode.Week);
+  const [isChecked, setIsChecked] = useState(true);
   const onChangeTasks = useCallback<OnChangeTasks>((nextTasks, action) => {
     switch (action.type) {
       case "delete_relation":
@@ -52,7 +52,10 @@ export const Comparison: React.FC = props => {
   }, []);
 
   return (
-    <div>
+    <div style={{ height: '1000px', overflow: "hidden" }}>
+      <div className="rightSwitcher">
+        <ViewSwitcher onViewModeChange={setViewMode} isChecked={!isChecked} onViewListChange={() => !isChecked} />
+      </div>
       <Gantt
         {...props}
         enableTaskGrouping={true}
@@ -63,7 +66,13 @@ export const Comparison: React.FC = props => {
         onEditTask={onEditTask}
         onClick={handleClick}
         tasks={tasks}
+        distances={{
+          minimumRowDisplayed: 1,
+          rowHeight: 50,
+          columnWidth: 100
+        }}
+        canResizeColumns={true}
       />
-    </div>
+    </div >
   );
 };

@@ -15,6 +15,7 @@ export enum ViewMode {
   Week = "Week",
   Month = "Month",
   QuarterYear = "QuarterYear",
+  HalfYear = "HalfYear",
   Year = "Year",
 }
 

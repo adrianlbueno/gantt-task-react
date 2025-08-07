@@ -34,7 +34,9 @@ export const defaultRenderBottomHeader = (
         case ViewMode.Year:
           value = formatDistance!("xYears", offsetFromStart);
           break;
-
+        case ViewMode.HalfYear:
+          value = formatDistance!("xMonths", offsetFromStart * 6);
+          break;
         case ViewMode.Month:
           value = formatDistance!("xMonths", offsetFromStart);
           break;
@@ -78,6 +80,11 @@ export const defaultRenderBottomHeader = (
   switch (viewMode) {
     case ViewMode.Year:
       return date.getFullYear();
+
+    case ViewMode.HalfYear: {
+      const half = Math.ceil((date.getMonth() + 1) / 6);
+      return `H${half}`;
+    }
 
     case ViewMode.Month:
       try {

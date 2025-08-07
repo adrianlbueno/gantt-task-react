@@ -112,6 +112,58 @@ export const Calendar: React.FC<CalendarProps> = ({
     return [topValues, bottomValues];
   };
 
+  const getCalenderValuesForHalfYear = () => {
+    const topValues: ReactNode[] = [];
+    const bottomValues: ReactNode[] = [];
+    const topDefaultHeight = headerHeight * 0.5;
+
+    for (let i = startColumnIndex; i <= endColumnIndex; i++) {
+      const date = getDate(i);
+      const halfYear = "H" + Math.ceil((date.getMonth() + 1) / 6); // 1-6 → H1, 7-12 → H2
+
+      // Bottom values: H1, H2
+      bottomValues.push(
+        <text
+          key={`${halfYear}-${date.getFullYear()}-${i}`}
+          y={headerHeight * 0.8}
+          x={additionalLeftSpace + columnWidth * i + columnWidth * 0.5}
+          className={styles.calendarBottomText}
+          style={{ fill: colors.barLabelColor }}
+        >
+          {halfYear}
+        </text>
+      );
+
+      if (
+        !isUnknownDates &&
+        (i === startColumnIndex ||
+          date.getFullYear() !== getDate(i - 1).getFullYear())
+      ) {
+        const year = date.getFullYear().toString();
+        const startHalf = Math.floor(i / 6) * 6;
+
+        topValues.push(
+          <TopPartOfCalendar
+            key={year}
+            value={year}
+            x1Line={additionalLeftSpace + columnWidth * startHalf}
+            y1Line={0}
+            y2Line={topDefaultHeight}
+            xText={
+              additionalLeftSpace + columnWidth * (startHalf + 3) // Center across 6 months
+            }
+            yText={topDefaultHeight * 0.9}
+            colors={colors}
+          />
+        );
+      }
+    }
+
+    return [topValues, bottomValues];
+  };
+
+
+
   const getCalendarValuesForQuarterYear = () => {
     const topValues: ReactNode[] = [];
     const bottomValues: ReactNode[] = [];
@@ -120,6 +172,7 @@ export const Calendar: React.FC<CalendarProps> = ({
     for (let i = startColumnIndex; i <= endColumnIndex; i++) {
       const date = getDate(i);
       const quarter = "Q" + Math.ceil((date.getMonth() + 1) / 3);
+      console.log('quarter :>> ', quarter);
 
       // Bottom values for each quarter
       bottomValues.push(
@@ -179,7 +232,6 @@ export const Calendar: React.FC<CalendarProps> = ({
           x={additionalLeftSpace + columnWidth * i + columnWidth * 0.5}
           className={styles.calendarBottomText}
           style={{ fill: colors.barLabelColor }}
-
         >
           {bottomValue}
         </text>
@@ -443,6 +495,9 @@ export const Calendar: React.FC<CalendarProps> = ({
   switch (dateSetup.viewMode) {
     case ViewMode.Year:
       [topValues, bottomValues] = getCalendarValuesForYear();
+      break;
+    case ViewMode.HalfYear:
+      [topValues, bottomValues] = getCalenderValuesForHalfYear();
       break;
     case ViewMode.QuarterYear:
       [topValues, bottomValues] = getCalendarValuesForQuarterYear();

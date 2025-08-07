@@ -14,6 +14,7 @@ import subMonths from "date-fns/subMonths";
 import subWeeks from "date-fns/subWeeks";
 import subYears from "date-fns/subYears";
 
+import { startOfHalfYear } from "date-fns";
 import { TaskOrEmpty, ViewMode } from "../types/public-types";
 import { getDatesDiff } from "./get-dates-diff";
 
@@ -49,6 +50,12 @@ export const ganttDateRange = (
       newStartDate = startOfYear(newStartDate);
       newEndDate = addYears(maxTaskDate, 1);
       newEndDate = startOfYear(newEndDate);
+      break;
+    case ViewMode.HalfYear:
+      newStartDate = subMonths(minTaskDate, preStepsCount * 6);
+      newStartDate = startOfHalfYear(newStartDate);
+      newEndDate = addMonths(maxTaskDate, 6);
+      newEndDate = startOfHalfYear(addMonths(newEndDate, 6));
       break;
     case ViewMode.QuarterYear:
       newStartDate = subMonths(minTaskDate, preStepsCount * 3);

@@ -1,6 +1,6 @@
 import format from "date-fns/format";
 
-import {DateSetup, ViewMode} from "../../types/public-types";
+import { DateSetup, ViewMode } from "../../types/public-types";
 
 const getDayText = (date: Date, dateSetup: DateSetup) => {
   try {
@@ -28,6 +28,12 @@ const getQuarterText = (date: Date) => {
   return `Q${quarter}`;
 };
 
+//todo: do i neeed to write this function?
+const getHalfYearText = (date: Date) => {
+  const halfYear = Math.ceil((date.getMonth() + 1) / 6);
+  return `H${halfYear}`;
+};
+
 export const defaultRenderTopHeader = (
   date: Date,
   viewMode: ViewMode,
@@ -36,6 +42,9 @@ export const defaultRenderTopHeader = (
   switch (viewMode) {
     case ViewMode.Year:
       return date.getFullYear().toString();
+    //todo: Get to complete this
+    case ViewMode.HalfYear:
+      return `${getHalfYearText(date)} ${date.getFullYear()}`;
 
     case ViewMode.QuarterYear:
       return `${getQuarterText(date)} ${date.getFullYear()}`;
