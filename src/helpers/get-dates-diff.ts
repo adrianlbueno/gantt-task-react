@@ -1,11 +1,11 @@
 import differenceInDays from "date-fns/differenceInDays";
 import differenceInHours from "date-fns/differenceInHours";
 import differenceInMonths from "date-fns/differenceInMonths";
+import differenceInQuarters from "date-fns/differenceInQuarters";
 import differenceInWeeks from "date-fns/differenceInWeeks";
 import differenceInYears from "date-fns/differenceInYears";
-import differenceInQuarters from "date-fns/differenceInQuarters";
 
-import {ViewMode} from "../types/public-types";
+import { ViewMode } from "../types/public-types";
 
 export const getDatesDiff = (
   dateFrom: Date,
@@ -36,6 +36,9 @@ export const getDatesDiff = (
 
     case ViewMode.QuarterYear:
       return differenceInQuarters(dateFrom, dateTo);
+
+    case ViewMode.HalfYear:
+      return Math.round(differenceInMonths(dateFrom, dateTo) / 6);
 
     case ViewMode.Year:
       return differenceInYears(dateFrom, dateTo);
