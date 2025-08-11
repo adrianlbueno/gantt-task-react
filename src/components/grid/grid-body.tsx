@@ -84,7 +84,6 @@ const GridBodyInner: React.FC<GridBodyProps> = ({
         i,
         startColumnIndex
       )) {
-        console.log('Drawing divider at column', i, 'date', currentDate);
 
         const x = additionalLeftSpace + columnWidth * i;
 
@@ -99,7 +98,7 @@ const GridBodyInner: React.FC<GridBodyProps> = ({
             y2={ganttFullHeight}
             stroke={dividerColor}
             opacity={0.15}
-            strokeWidth={5}
+            strokeWidth={2}
           />
         );
       }
