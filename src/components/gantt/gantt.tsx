@@ -124,6 +124,7 @@ const defaultColors: ColorStyles = {
   selectedTaskBackgroundColor: "rgba(252, 248, 227, 0.5)",
   taskDragColor: "#7474ff",
   todayColor: "rgba(252, 248, 227, 0.5)",
+  dividerColor: "rgba(22, 16, 14, 0.27)", //new color
   contextMenuBoxShadow: "rgb(0 0 0 / 25%) 1px 1px 5px 1px",
   contextMenuBgColor: "#fff",
   contextMenuTextColor: "inherit"
@@ -1797,6 +1798,7 @@ export const Gantt: React.FC<GanttProps> = ({
     rtl,
     startDate,
     todayColor: colorStyles.todayColor,
+    dividerColor: colorStyles.dividerColor,
     holidayBackgroundColor: colorStyles.holidayBackgroundColor,
     viewMode,
     startColumnIndex,

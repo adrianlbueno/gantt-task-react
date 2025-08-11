@@ -63,7 +63,6 @@ const TaskGanttInner: React.FC<TaskGanttProps> = (props) => {
       ganttTaskRootRef.current.scrollLeft
       : fullSvgWidth,
   };
-  console.log('containerStyle:>> ', containerStyle);
 
   const gridStyle = useMemo<CSSProperties>(
     () => ({

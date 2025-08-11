@@ -119,9 +119,8 @@ export const Calendar: React.FC<CalendarProps> = ({
 
     for (let i = startColumnIndex; i <= endColumnIndex; i++) {
       const date = getDate(i);
-      const halfYear = "H" + Math.ceil((date.getMonth() + 1) / 6); // 1-6 → H1, 7-12 → H2
+      const halfYear = "H" + Math.ceil((date.getMonth() + 1) / 6);
 
-      // Bottom values: H1, H2
       bottomValues.push(
         <text
           key={`${halfYear}-${date.getFullYear()}-${i}`}
@@ -161,8 +160,6 @@ export const Calendar: React.FC<CalendarProps> = ({
 
     return [topValues, bottomValues];
   };
-
-
 
   const getCalendarValuesForQuarterYear = () => {
     const topValues: ReactNode[] = [];

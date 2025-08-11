@@ -1,6 +1,8 @@
-import React, { memo, useMemo } from "react";
+import { ReactNode, memo, useMemo } from "react";
 import { getDatesDiff } from "../../helpers/get-dates-diff";
 
+import React from "react";
+import { shouldDrawVerticalDivider } from "../../helpers/time-unit-boundaries";
 import type { DateExtremity, ViewMode } from "../../types/public-types";
 
 export type GridBodyProps = {
@@ -18,6 +20,7 @@ export type GridBodyProps = {
   checkIsHoliday: (date: Date, dateExtremity: DateExtremity) => boolean;
   getDate: (index: number) => Date;
   minTaskDate: Date;
+  dividerColor: string;
 };
 
 const GridBodyInner: React.FC<GridBodyProps> = ({
@@ -29,7 +32,12 @@ const GridBodyInner: React.FC<GridBodyProps> = ({
   rtl,
   startDate,
   viewMode,
+  dividerColor,
+  startColumnIndex,
+  endColumnIndex,
+  getDate
 }) => {
+
   const today = useMemo(() => {
     if (isUnknownDates) {
       return null;
@@ -61,9 +69,61 @@ const GridBodyInner: React.FC<GridBodyProps> = ({
     viewMode,
   ]);
 
+  const verticalDividers = useMemo(() => {
+    const dividers: ReactNode[] = [];
+
+    for (let i = startColumnIndex; i <= endColumnIndex; i++) {
+      const currentDate = getDate(i);
+      const previousDate = i > startColumnIndex ? getDate(i - 1) : null;
+
+      if (shouldDrawVerticalDivider(
+        currentDate,
+        previousDate,
+        viewMode,
+        isUnknownDates,
+        i,
+        startColumnIndex
+      )) {
+        console.log('Drawing divider at column', i, 'date', currentDate);
+
+        const x = additionalLeftSpace + columnWidth * i;
+
+        console.log("debugging x:", x);
+        console.log("divider color", dividerColor)
+        dividers.push(
+          <line
+            key={`divider-${i}`}
+            x1={x}
+            x2={x}
+            y1={0}
+            y2={ganttFullHeight}
+            stroke={dividerColor}
+            opacity={0.15}
+            strokeWidth={5}
+          />
+        );
+      }
+    }
+
+    return dividers;
+  }, [
+    additionalLeftSpace,
+    columnWidth,
+    ganttFullHeight,
+    viewMode,
+    isUnknownDates,
+    startColumnIndex,
+    endColumnIndex,
+    getDate,
+    dividerColor
+  ]);
+
+  console.log('verticalDividers :>> ', verticalDividers);
   return (
     <g className="gridBody">
       <g className="today">{today}</g>
+      <g className="verticalDividers">{verticalDividers}</g>
+
     </g>
   );
 };

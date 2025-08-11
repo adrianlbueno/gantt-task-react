@@ -109,6 +109,7 @@ export interface ColorStyles {
   taskDragColor: string;
   selectedTaskBackgroundColor: string;
   todayColor: string;
+  dividerColor: string;
   contextMenuBoxShadow: string;
   contextMenuBgColor: string;
   contextMenuTextColor: string;
