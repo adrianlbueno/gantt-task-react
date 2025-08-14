@@ -54,6 +54,11 @@ const TaskGanttInner: React.FC<TaskGanttProps> = (props) => {
     colors
   } = props;
 
+
+  //console.log("ganttFullHeight:", ganttFullHeight)
+  //console.log("minumunRowsDisplayed:", minimumRowDisplayed)
+  //console.log("result:", minimumRowDisplayed * rowHeight)
+
   const containerStyle: CSSProperties = {
     // In order to see the vertical scrollbar of the gantt content,
     // we resize dynamically the width of the gantt content

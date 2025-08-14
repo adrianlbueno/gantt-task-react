@@ -141,6 +141,7 @@ const defaultDateFormats: DateFormats = {
 
 const defaultDistances: Distances = {
   actionColumnWidth: 40,
+  ganttHeight: 0,
   arrowIndent: 20,
   taskHeight: 24,
   barCornerRadius: 3,
@@ -240,6 +241,7 @@ export const Gantt: React.FC<GanttProps> = ({
   const ganttSVGRef = useRef<SVGSVGElement>(null);
   const wrapperRef = useRef<HTMLDivElement>(null);
   const taskListRef = useRef<HTMLDivElement>(null);
+
 
   const { contextMenu, handleCloseContextMenu, handleOpenContextMenu } =
     useContextMenu(wrapperRef);

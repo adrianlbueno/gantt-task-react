@@ -136,6 +136,7 @@ export interface Distances {
    * From 0 to 100
    */
   barFill: number;
+  ganttHeight: number;
   columnWidth: number;
   contextMenuIconWidth: number;
   contextMenuOptionHeight: number;

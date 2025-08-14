@@ -52,7 +52,7 @@ export const Comparison: React.FC = props => {
   }, []);
 
   return (
-    <div style={{ height: '1000px', overflow: "hidden" }}>
+    <div >
       <div className="rightSwitcher">
         <ViewSwitcher onViewModeChange={setViewMode} isChecked={!isChecked} onViewListChange={() => !isChecked} />
       </div>
@@ -67,7 +67,7 @@ export const Comparison: React.FC = props => {
         onClick={handleClick}
         tasks={tasks}
         distances={{
-          minimumRowDisplayed: 1,
+          minimumRowDisplayed: 10,
           rowHeight: 50,
           columnWidth: 100
         }}

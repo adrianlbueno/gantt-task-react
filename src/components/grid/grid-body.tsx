@@ -87,8 +87,6 @@ const GridBodyInner: React.FC<GridBodyProps> = ({
 
         const x = additionalLeftSpace + columnWidth * i;
 
-        console.log("debugging x:", x);
-        console.log("divider color", dividerColor)
         dividers.push(
           <line
             key={`divider-${i}`}
@@ -117,7 +115,6 @@ const GridBodyInner: React.FC<GridBodyProps> = ({
     dividerColor
   ]);
 
-  console.log('verticalDividers :>> ', verticalDividers);
   return (
     <g className="gridBody">
       <g className="today">{today}</g>
