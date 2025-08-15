@@ -310,7 +310,6 @@ export const TaskGanttContent: React.FC<TaskGanttContentProps> = ({
         const dependentsByTask = dependentsAtLevel?.get(taskId);
 
         dependentsByTask?.filter(({ dependent }) => visibleTasksMirror[dependent.id]).forEach(dep => {
-          console.log("dependent", dep)
           const addedDepsForDep = addedDependenciesAtLevel[dep.dependent.id] ??= {};
 
           if (addedDepsForDep[taskId]) return;

@@ -1,6 +1,5 @@
 import React, { useCallback, useState } from "react";
 import "../dist/style.css";
-import { ViewSwitcher } from "../example/src/components/view-switcher";
 import { Gantt, OnChangeTasks, Task, TaskOrEmpty, ViewMode } from "../src";
 import { initTasksUser, onAddTask, onEditTask } from "./helper";
 
@@ -53,9 +52,6 @@ export const Comparison: React.FC = props => {
 
   return (
     <div >
-      <div className="rightSwitcher">
-        <ViewSwitcher onViewModeChange={setViewMode} isChecked={!isChecked} onViewListChange={() => !isChecked} />
-      </div>
       <Gantt
         {...props}
         enableTaskGrouping={true}

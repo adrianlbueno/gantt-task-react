@@ -169,7 +169,6 @@ export const Calendar: React.FC<CalendarProps> = ({
     for (let i = startColumnIndex; i <= endColumnIndex; i++) {
       const date = getDate(i);
       const quarter = "Q" + Math.ceil((date.getMonth() + 1) / 3);
-      console.log('quarter :>> ', quarter);
 
       // Bottom values for each quarter
       bottomValues.push(

@@ -35,7 +35,5 @@ export const getChildsAndRoots = (
     childRes.set(comparisonLevel, parentsByLevel);
   });
 
-  //console.log('childRes :>> ', childRes);
-  //console.log('rootRes :>> ', rootRes);
   return [childRes, rootRes];
 };

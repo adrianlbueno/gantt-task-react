@@ -9,8 +9,6 @@ export const getTaskRowIndex = (
     comparisonLevel = 1,
   } = task;
 
-  console.log('getTaskRowIndex :>> ', task);
-
   const rowIndexByLevel = taskToRowIndexMap.get(comparisonLevel);
 
   if (!rowIndexByLevel) {

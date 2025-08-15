@@ -54,15 +54,10 @@ const TaskGanttInner: React.FC<TaskGanttProps> = (props) => {
     colors
   } = props;
 
-
-  //console.log("ganttFullHeight:", ganttFullHeight)
-  //console.log("minumunRowsDisplayed:", minimumRowDisplayed)
-  //console.log("result:", minimumRowDisplayed * rowHeight)
-
   const containerStyle: CSSProperties = {
     // In order to see the vertical scrollbar of the gantt content,
     // we resize dynamically the width of the gantt content
-    height: Math.max(ganttFullHeight, minimumRowDisplayed * rowHeight),
+    height: Math.min(ganttFullHeight, minimumRowDisplayed * rowHeight),
     width: ganttTaskRootRef?.current
       ? ganttTaskRootRef.current.clientWidth +
       ganttTaskRootRef.current.scrollLeft
@@ -71,7 +66,7 @@ const TaskGanttInner: React.FC<TaskGanttProps> = (props) => {
 
   const gridStyle = useMemo<CSSProperties>(
     () => ({
-      height: Math.max(ganttFullHeight, minimumRowDisplayed * rowHeight),
+      height: ganttFullHeight,
       width: fullSvgWidth,
       backgroundSize: `${columnWidth}px ${fullRowHeight * 2}px`,
       backgroundPositionX: additionalLeftSpace || undefined,

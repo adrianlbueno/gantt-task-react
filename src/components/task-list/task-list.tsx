@@ -173,16 +173,21 @@ const TaskListInner: React.FC<TaskListProps & TaskListHeaderActionsProps> = (
           className={styles.taskListContent}
           ref={taskListContentRef}
           onScroll={onScrollTableListContentVertically}
+          style={{
+            height: Math.min(
+              ganttFullHeight,
+              distances.minimumRowDisplayed * distances.rowHeight
+            ),
+            overflowY: "auto",
+          }}
         >
           <div
             style={{
-              height: Math.max(
+              height:
                 ganttFullHeight,
-                distances.minimumRowDisplayed * distances.rowHeight
-              ),
+
               backgroundSize: `100% ${fullRowHeight * 2}px`,
-              backgroundImage: `linear-gradient(to bottom, transparent ${fullRowHeight}px, #f5f5f5 ${fullRowHeight}px)`,
-              overflow: "hidden"
+              backgroundImage: `linear-gradient(to bottom, transparent ${fullRowHeight}px, #f5f5f5 ${fullRowHeight}px)`
             }}
           >
 

@@ -30,12 +30,6 @@ export const countTaskCoordinates = (
 
   const indexesAtLevel = taskToRowIndexMap.get(comparisonLevel);
 
-  //console.log("Looking for task id:", task.id, "level:", comparisonLevel);
-
-  /*console.log("taskToRowIndexMap", Array.from(taskToRowIndexMap.entries()).map(([level, map]) => ({
-    level,
-    rows: Array.from(map.entries())
-  })));*/
 
   if (!indexesAtLevel) {
     throw new Error(`Indexes at level ${comparisonLevel} are not found`);
