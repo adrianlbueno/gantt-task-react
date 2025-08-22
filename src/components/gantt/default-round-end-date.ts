@@ -4,16 +4,16 @@ import differenceInMinutes from "date-fns/differenceInMinutes";
 import differenceInMonths from "date-fns/differenceInMonths";
 import endOfDay from "date-fns/endOfDay";
 import endOfHour from "date-fns/endOfHour";
-import endOfMonth from "date-fns/endOfMonth";
 import endOfWeek from "date-fns/endOfISOWeek";
+import endOfMonth from "date-fns/endOfMonth";
 import endOfQuarter from "date-fns/endOfQuarter";
 import endOfYear from "date-fns/endOfYear";
 import subDays from "date-fns/subDays";
 import subHours from "date-fns/subHours";
 import subMonths from "date-fns/subMonths";
+import subQuarters from "date-fns/subQuarters";
 import subWeeks from "date-fns/subWeeks";
 import subYears from "date-fns/subYears";
-import subQuarters from "date-fns/subQuarters";
 
 import { ViewMode } from "../../types/public-types";
 
@@ -101,7 +101,7 @@ export const defaultRoundEndDate = (date: Date, viewMode: ViewMode) => {
       return subMonths(end, 1);
     }
 
-    case ViewMode.QuarterYear:{
+    case ViewMode.QuarterYear: {
       const end = endOfQuarter(date);
       const diff = differenceInMonths(end, date);
 
@@ -111,6 +111,18 @@ export const defaultRoundEndDate = (date: Date, viewMode: ViewMode) => {
 
       return subQuarters(end, 1);
     }
+
+    case ViewMode.HalfYear: {
+      const month = date.getMonth()
+      if (month < 6) {
+        return endOfHour(new Date(date.getFullYear(), 5, 1))
+      } else {
+
+        return endOfYear(date)
+      }
+
+    }
+
     case ViewMode.Year: {
       const end = endOfYear(date);
       const diff = differenceInMonths(end, date);

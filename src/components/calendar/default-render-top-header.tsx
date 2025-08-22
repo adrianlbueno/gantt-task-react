@@ -23,12 +23,10 @@ const getMonthText = (date: Date, dateSetup: DateSetup) => {
 };
 
 const getQuarterText = (date: Date) => {
-  // Calculate the quarter number (1-4)
   const quarter = Math.ceil((date.getMonth() + 1) / 3);
   return `Q${quarter}`;
 };
 
-//todo: do i neeed to write this function?
 const getHalfYearText = (date: Date) => {
   const halfYear = Math.ceil((date.getMonth() + 1) / 6);
   return `H${halfYear}`;
@@ -42,7 +40,7 @@ export const defaultRenderTopHeader = (
   switch (viewMode) {
     case ViewMode.Year:
       return date.getFullYear().toString();
-    //todo: Get to complete this
+
     case ViewMode.HalfYear:
       return `${getHalfYearText(date)} ${date.getFullYear()}`;
 
