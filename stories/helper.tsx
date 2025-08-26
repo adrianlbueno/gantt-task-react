@@ -16,7 +16,7 @@ export function initTasksUser(): TaskOrEmpty[] {
       id: "user-1",
       type: "user",
       name: "Adrian Bueno",
-      hideChildren: true,
+      hideChildren: false,
     },
     {
       id: "audit-1",

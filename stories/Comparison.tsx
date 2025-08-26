@@ -1,6 +1,6 @@
 import React, { useCallback, useState } from "react";
 import "../dist/style.css";
-import { Gantt, OnChangeTasks, Task, TaskOrEmpty } from "../src";
+import { Gantt, OnChangeTasks, Task, TaskOrEmpty, ViewMode } from "../src";
 import { initTasksUser, onAddTask, onEditTask } from "./helper";
 
 export const Comparison: React.FC = props => {
@@ -62,6 +62,7 @@ export const Comparison: React.FC = props => {
         onEditTask={onEditTask}
         onClick={handleClick}
         tasks={tasks}
+        viewMode={ViewMode.HalfYear}
         distances={{
           minimumRowDisplayed: 10,
           rowHeight: 50,

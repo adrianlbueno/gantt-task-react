@@ -117,6 +117,8 @@ export const Calendar: React.FC<CalendarProps> = ({
     const bottomValues: ReactNode[] = [];
     const topDefaultHeight = headerHeight * 0.5;
 
+    let lastYear: number | null = null;
+
     for (let i = startColumnIndex; i <= endColumnIndex; i++) {
       const date = getDate(i);
       const halfYear = "H" + Math.ceil((date.getMonth() + 1) / 6);
@@ -138,19 +140,20 @@ export const Calendar: React.FC<CalendarProps> = ({
         (i === startColumnIndex ||
           date.getFullYear() !== getDate(i - 1).getFullYear())
       ) {
-        const year = date.getFullYear().toString();
-        const startHalf = Math.floor(i / 6) * 6;
+        const year = date.getFullYear();
+        lastYear = year;
+
+        const firstMonthIndex = i - date.getMonth();
+        const centerIndex = firstMonthIndex + 6;
 
         topValues.push(
           <TopPartOfCalendar
-            key={year}
-            value={year}
-            x1Line={additionalLeftSpace + columnWidth * startHalf}
+            key={`year-${year}`}
+            value={year.toString()}
+            x1Line={additionalLeftSpace + columnWidth * firstMonthIndex}
             y1Line={0}
             y2Line={topDefaultHeight}
-            xText={
-              additionalLeftSpace + columnWidth * (startHalf + 3) // Center across 6 months
-            }
+            xText={additionalLeftSpace + columnWidth * centerIndex}
             yText={topDefaultHeight * 0.9}
             colors={colors}
           />
@@ -159,6 +162,7 @@ export const Calendar: React.FC<CalendarProps> = ({
     }
 
     return [topValues, bottomValues];
+
   };
 
   const getCalendarValuesForQuarterYear = () => {
