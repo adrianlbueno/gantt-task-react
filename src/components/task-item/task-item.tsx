@@ -68,16 +68,13 @@ export type TaskItemProps = {
   fixEndPosition?: FixPosition;
   handleDeleteTasks: (task: TaskOrEmpty[]) => void;
   colorStyles: ColorStyles;
-  //new props
   enableTaskGrouping?: boolean;
-  getTaskInitials?: (task: Task) => string;
 };
 
 const TaskItemInner: React.FC<TaskItemProps> = props => {
   const {
     childOutOfParentWarnings,
     colorStyles: stylesProp,
-
     distances: {
       arrowIndent,
       handleWidth,
@@ -103,7 +100,7 @@ const TaskItemInner: React.FC<TaskItemProps> = props => {
     rtl,
     selectTaskOnMouseDown,
     setTooltipTask,
-
+    enableTaskGrouping,
     task,
     task: { styles: taskStyles },
 
@@ -364,6 +361,9 @@ const TaskItemInner: React.FC<TaskItemProps> = props => {
   }, [setTooltipTask]);
 
   let barLabelFill = (isTextInside || task.type == "milestone") ? styles.barLabelColor : styles.barLabelWhenOutsideColor;
+
+  //let testing = (!enableTaskGrouping || isTextInside) ? task.name : ''
+
   return (
     <g
       className={fixWidthContainerClass}
@@ -397,7 +397,7 @@ const TaskItemInner: React.FC<TaskItemProps> = props => {
         }
         ref={textRef}
       >
-        {isTextInside ? task.name : ""}
+        {task.name}
       </text>
 
       {(outOfParentWarnings || hasDependencyWarning) && (

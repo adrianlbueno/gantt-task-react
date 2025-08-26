@@ -1,11 +1,12 @@
 import React, { useCallback, useState } from "react";
 import "../dist/style.css";
-import { Gantt, OnChangeTasks, Task, TaskOrEmpty, ViewMode } from "../src";
+import { Gantt, OnChangeTasks, Task, TaskOrEmpty } from "../src";
 import { initTasksUser, onAddTask, onEditTask } from "./helper";
 
 export const Comparison: React.FC = props => {
   const [tasks, setTasks] = useState<readonly TaskOrEmpty[]>(() => {
     const firstLevelTasks = initTasksUser();
+
 
     firstLevelTasks.map(
       (task) => ({
@@ -16,8 +17,6 @@ export const Comparison: React.FC = props => {
     return [...firstLevelTasks];
   });
 
-  const [viewMode, setViewMode] = useState<ViewMode>(ViewMode.Week);
-  const [isChecked, setIsChecked] = useState(true);
   const onChangeTasks = useCallback<OnChangeTasks>((nextTasks, action) => {
     switch (action.type) {
       case "delete_relation":
@@ -42,6 +41,7 @@ export const Comparison: React.FC = props => {
     }
   }, []);
 
+  console.log('tasks :>> ', tasks);
   const handleDblClick = useCallback((task: Task) => {
     alert("On Double Click event Id:" + task.id);
   }, []);

@@ -765,7 +765,6 @@ export const Gantt: React.FC<GanttProps> = ({
 
   const handleExpanderClick = useCallback(
     (clickedTask: Task) => {
-
       if (onChangeExpandState) {
         onChangeExpandState({
           ...clickedTask,
@@ -1727,7 +1726,7 @@ export const Gantt: React.FC<GanttProps> = ({
     (task: Task) => countTaskCoordinates(getTaskCurrentState(task)),
     [countTaskCoordinates, getTaskCurrentState]
   );
-  // const getTaskCoordinates = (task: Task) => countTaskCoordinates(task);
+
 
   const contextMenuOptions = useMemo<ContextMenuOptionType[]>(() => {
     if (contextMenuOptionsProp) {

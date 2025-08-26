@@ -48,7 +48,6 @@ const TaskListTableDefaultInner: React.FC<TaskListTableProps> = ({
     return tasks.filter(task => task.type !== "user");
   }, [tasks, enableTaskGrouping]);
 
-
   const [draggedTask, setDraggedTask] = useState<TaskOrEmpty>(null);
 
   const renderedListWithOffset = useMemo(() => {

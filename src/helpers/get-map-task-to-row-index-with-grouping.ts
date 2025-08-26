@@ -37,7 +37,6 @@ export const getMapTaskToRowIndexWithGrouping = (
 
       let assignedRowIndex = rowIndex;
 
-      // Always assign a row for user/group header tasks
       if (type === "user" || type === "project") {
         taskToRow.set(id, rowIndex);
         rowToTask.set(rowIndex, task);
@@ -46,10 +45,9 @@ export const getMapTaskToRowIndexWithGrouping = (
 
         rowIndex++;
         globalRowIndex++;
-        continue; // skip the rest of the loop
+        continue;
       }
 
-      // Handle grouping logic for children
       if (isGrouped && parent) {
         const parentTask = parentMap.get(parent);
         const parentRowIndex = taskToRow.get(parent);

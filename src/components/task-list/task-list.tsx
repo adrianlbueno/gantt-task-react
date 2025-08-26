@@ -168,7 +168,6 @@ const TaskListInner: React.FC<TaskListProps & TaskListHeaderActionsProps> = (
           colors={colors}
         />
 
-
         <div
           className={styles.taskListContent}
           ref={taskListContentRef}
@@ -183,9 +182,7 @@ const TaskListInner: React.FC<TaskListProps & TaskListHeaderActionsProps> = (
         >
           <div
             style={{
-              height:
-                ganttFullHeight,
-
+              height: ganttFullHeight,
               backgroundSize: `100% ${fullRowHeight * 2}px`,
               backgroundImage: `linear-gradient(to bottom, transparent ${fullRowHeight}px, #f5f5f5 ${fullRowHeight}px)`
             }}

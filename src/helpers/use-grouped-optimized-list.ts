@@ -31,7 +31,6 @@ export const useGroupedVirtualization = (
             .sort((a, b) => a.rowIndex - b.rowIndex);
     }, [rowIndexToTasksMap, taskHeight]);
 
-    // 🛡️ Fallback for empty entries
     if (!rowEntries || rowEntries.length === 0) {
         return [0, 0, true, true, 0];
     }
