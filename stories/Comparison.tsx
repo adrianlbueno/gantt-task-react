@@ -66,7 +66,7 @@ export const Comparison: React.FC = props => {
         distances={{
           minimumRowDisplayed: 10,
           rowHeight: 50,
-          columnWidth: 100
+          columnWidth: 200,
         }}
         canResizeColumns={true}
       />

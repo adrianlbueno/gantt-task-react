@@ -18,11 +18,14 @@ export const shouldDrawVerticalDivider = (
             return currentDate.getFullYear() !== previousDate.getFullYear();
 
         case ViewMode.HalfYear:
-            // Divider at year change
-            return currentDate.getFullYear() !== previousDate.getFullYear();
+            const currentHalf = Math.ceil((currentDate.getMonth() + 1) / 6);
+            const previousHalf = Math.ceil((previousDate.getMonth() + 1) / 6);
+            return (
+                currentHalf !== previousHalf ||
+                currentDate.getFullYear() !== previousDate.getFullYear()
+            );
 
         case ViewMode.QuarterYear:
-            // Divider at quarter change
             return (
                 Math.ceil((currentDate.getMonth() + 1) / 3) !==
                 Math.ceil((previousDate.getMonth() + 1) / 3) ||

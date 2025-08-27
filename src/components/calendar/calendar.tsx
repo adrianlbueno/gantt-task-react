@@ -117,8 +117,6 @@ export const Calendar: React.FC<CalendarProps> = ({
     const bottomValues: ReactNode[] = [];
     const topDefaultHeight = headerHeight * 0.5;
 
-    let lastYear: number | null = null;
-
     for (let i = startColumnIndex; i <= endColumnIndex; i++) {
       const date = getDate(i);
       const halfYear = "H" + Math.ceil((date.getMonth() + 1) / 6);
@@ -140,30 +138,34 @@ export const Calendar: React.FC<CalendarProps> = ({
         (i === startColumnIndex ||
           date.getFullYear() !== getDate(i - 1).getFullYear())
       ) {
-        const year = date.getFullYear();
-        lastYear = year;
 
-        const firstMonthIndex = i - date.getMonth();
-        const centerIndex = firstMonthIndex + 6;
+        const year = date.getFullYear();
+
+        console.log('Fulll year :>> ', year);
+        const topValue = year.toString();
+        const startHalfYearIndex = i - date.getMonth();
+
+        const centerX = additionalLeftSpace + columnWidth * i + columnWidth;
 
         topValues.push(
           <TopPartOfCalendar
             key={`year-${year}`}
-            value={year.toString()}
-            x1Line={additionalLeftSpace + columnWidth * firstMonthIndex}
+            value={topValue}
+            x1Line={additionalLeftSpace + columnWidth * startHalfYearIndex}
             y1Line={0}
             y2Line={topDefaultHeight}
-            xText={additionalLeftSpace + columnWidth * centerIndex}
+            xText={centerX}
             yText={topDefaultHeight * 0.9}
             colors={colors}
           />
-        );
+        )
       }
     }
 
     return [topValues, bottomValues];
 
   };
+
 
   const getCalendarValuesForQuarterYear = () => {
     const topValues: ReactNode[] = [];
@@ -215,6 +217,7 @@ export const Calendar: React.FC<CalendarProps> = ({
     }
     return [topValues, bottomValues];
   };
+
 
   const getCalendarValuesForMonth = () => {
     const topValues: ReactNode[] = [];
@@ -300,6 +303,7 @@ export const Calendar: React.FC<CalendarProps> = ({
           {bottomValue}
         </text>
       );
+
 
       if (topValue) {
         topValues.push(
@@ -412,7 +416,7 @@ export const Calendar: React.FC<CalendarProps> = ({
 
       const dayOfMonth = date.getDate();
       const prevDate = getDate(i - 1);
-
+      console.log('testing center :>> ', additionalLeftSpace + columnWidth * i + ticks * columnWidth * 0.5);
       if (!isUnknownDates && dayOfMonth !== prevDate.getDate()) {
         const topValue = renderTopHeaderByDate(date);
 
