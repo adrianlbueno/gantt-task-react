@@ -362,7 +362,7 @@ const TaskItemInner: React.FC<TaskItemProps> = props => {
 
   let barLabelFill = (isTextInside || task.type == "milestone") ? styles.barLabelColor : styles.barLabelWhenOutsideColor;
 
-  let testing = (!enableTaskGrouping || isTextInside) ? task.name : ''
+  //let testing = (!enableTaskGrouping || isTextInside) ? task.name : ''
 
   return (
     <g
