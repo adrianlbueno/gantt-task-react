@@ -206,6 +206,9 @@ export const TaskGanttContent: React.FC<TaskGanttContentProps> = ({
             key={key}
           >
             <TaskItem
+              enableTaskGrouping={enableTaskGrouping}
+              taskToRowIndexMap={taskToRowIndexMap}
+              rowIndexToTasksMap={rowIndexToTasksMap}
               getTaskGlobalIndexByRef={getTaskGlobalIndexByRef}
               hasChildren={checkHasChildren(task, childTasksMap)}
               hasDependencyWarning={
@@ -243,7 +246,6 @@ export const TaskGanttContent: React.FC<TaskGanttContentProps> = ({
               fixEndPosition={fixEndPosition}
               handleDeleteTasks={handleDeleteTasks}
               colorStyles={colorStyles}
-              enableTaskGrouping={enableTaskGrouping}
             />
           </svg>
         );

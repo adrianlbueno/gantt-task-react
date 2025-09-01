@@ -7,7 +7,6 @@ export const Comparison: React.FC = props => {
   const [tasks, setTasks] = useState<readonly TaskOrEmpty[]>(() => {
     const firstLevelTasks = initTasksUser();
 
-
     firstLevelTasks.map(
       (task) => ({
         ...task,
@@ -41,7 +40,6 @@ export const Comparison: React.FC = props => {
     }
   }, []);
 
-  console.log('tasks :>> ', tasks);
   const handleDblClick = useCallback((task: Task) => {
     alert("On Double Click event Id:" + task.id);
   }, []);
@@ -62,11 +60,11 @@ export const Comparison: React.FC = props => {
         onEditTask={onEditTask}
         onClick={handleClick}
         tasks={tasks}
-        viewMode={ViewMode.HalfYear}
+        viewMode={ViewMode.Year}
         distances={{
           minimumRowDisplayed: 10,
           rowHeight: 50,
-          columnWidth: 200,
+          columnWidth: 300,
         }}
         canResizeColumns={true}
       />

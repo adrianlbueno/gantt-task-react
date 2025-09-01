@@ -66,6 +66,7 @@ const TaskListTableDefaultInner: React.FC<TaskListTableProps> = ({
         const taskIndex = indexesOnLevel?.get(id);
         const [depth, indexStr] = taskIndex ?? [0, ""];
 
+
         renderList.push(
           <TaskListTableRow
             key={id}
@@ -132,6 +133,7 @@ const TaskListTableDefaultInner: React.FC<TaskListTableProps> = ({
             [depth, indexStr] = taskIndex;
           }
 
+          console.log('colors :>> ', colors);
           renderList.push(
             <TaskListTableRow
               key={id}

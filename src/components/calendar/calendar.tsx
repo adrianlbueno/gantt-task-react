@@ -416,7 +416,6 @@ export const Calendar: React.FC<CalendarProps> = ({
 
       const dayOfMonth = date.getDate();
       const prevDate = getDate(i - 1);
-      console.log('testing center :>> ', additionalLeftSpace + columnWidth * i + ticks * columnWidth * 0.5);
       if (!isUnknownDates && dayOfMonth !== prevDate.getDate()) {
         const topValue = renderTopHeaderByDate(date);
 

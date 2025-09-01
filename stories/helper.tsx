@@ -39,7 +39,7 @@ export function initTasksUser(): TaskOrEmpty[] {
     {
       id: "audit-3",
       type: "task",
-      name: "Audit 2",
+      name: "Audit 2 testing unique labal name",
       start: new Date(currentDate.getFullYear(), currentDate.getMonth(), 8),
       end: new Date(currentDate.getFullYear(), currentDate.getMonth(), 15),
       progress: 30,
@@ -141,7 +141,7 @@ export function initTasksUser(): TaskOrEmpty[] {
       type: "task",
       name: "Testing coolerere",
       start: new Date(currentDate.getFullYear(), currentDate.getMonth(), 15),
-      end: new Date(currentDate.getFullYear(), currentDate.getMonth(), 15),
+      end: new Date(currentDate.getFullYear(), currentDate.getMonth(), 17),
       progress: 70,
       displayOrder: 4,
       parent: "user-coolerer"

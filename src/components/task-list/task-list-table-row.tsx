@@ -206,6 +206,7 @@ const TaskListTableRowInner: React.FC<TaskListTableRowProps> =
       backgroundColor = colors.taskDragColor;
     }
 
+
     const handleDragStart: React.DragEventHandler<HTMLDivElement> = (
       event: React.DragEvent<HTMLDivElement>
     ) => {

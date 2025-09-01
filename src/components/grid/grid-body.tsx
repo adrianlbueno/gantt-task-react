@@ -87,8 +87,6 @@ const GridBodyInner: React.FC<GridBodyProps> = ({
 
         const x = additionalLeftSpace + columnWidth * i;
 
-        console.log("drawing divider at x:", x, "for index:", i, "date:", currentDate);
-
         dividers.push(
           <line
             key={`divider-${i}`}

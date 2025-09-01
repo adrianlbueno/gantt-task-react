@@ -8,6 +8,7 @@ import React, {
   useState,
 } from "react";
 
+import { truncateText } from "../../helpers/truncate-task-label";
 import { GanttRelationEvent } from "../../types/gantt-task-actions";
 import {
   BarMoveAction,
@@ -17,8 +18,10 @@ import {
   Distances,
   FixPosition,
   RelationKind,
+  RowIndexToTasksMap,
   Task,
   TaskOrEmpty,
+  TaskToRowIndexMap
 } from "../../types/public-types";
 import { BarFixWidth, fixWidthContainerClass } from "../other/bar-fix-width";
 import { Bar } from "./bar/bar";
@@ -32,6 +35,8 @@ export type TaskItemProps = {
   children?: React.ReactNode
   getTaskGlobalIndexByRef: (task: Task) => number;
   hasChildren: boolean;
+  rowIndexToTasksMap: RowIndexToTasksMap;
+  taskToRowIndexMap: TaskToRowIndexMap;
   hasDependencyWarning: boolean;
   progressWidth: number;
   progressX: number;
@@ -101,6 +106,8 @@ const TaskItemInner: React.FC<TaskItemProps> = props => {
     selectTaskOnMouseDown,
     setTooltipTask,
     enableTaskGrouping,
+    taskToRowIndexMap,
+    rowIndexToTasksMap,
     task,
     task: { styles: taskStyles },
 
@@ -173,6 +180,16 @@ const TaskItemInner: React.FC<TaskItemProps> = props => {
     fixEndPosition(task, end.date, globalIndex);
   }, [task, fixEndPosition, outOfParentWarnings, getTaskGlobalIndexByRef]);
 
+  const taskRowIndex =
+    taskToRowIndexMap?.get(task.comparisonLevel ?? 1)?.get(task.id);
+
+  if (taskRowIndex === undefined) return null;
+
+  const isSharedRow =
+    (rowIndexToTasksMap?.get(task.comparisonLevel ?? 1)?.get(taskRowIndex)?.length ?? 0) > 1;
+
+  const isInCollapsedGroup = !!enableTaskGrouping && isSharedRow;
+
   const handleClick = useCallback(
     (event: React.MouseEvent<SVGElement>) => {
       if (onClick) {
@@ -213,6 +230,9 @@ const TaskItemInner: React.FC<TaskItemProps> = props => {
 
   const textRef = useRef<SVGTextElement>(null);
   const [isTextInside, setIsTextInside] = useState(true);
+
+  const [truncatedText, setTruncatedText] = useState(task.name);
+
 
   const taskItem = useMemo(() => {
     const isFromStartRelationAuthorized =
@@ -325,10 +345,16 @@ const TaskItemInner: React.FC<TaskItemProps> = props => {
   ]);
 
   useEffect(() => {
-    if (textRef.current) {
+    if (!textRef.current) return;
+
+    if (isInCollapsedGroup) {
+      const truncated = truncateText(task.name, width - 10, textRef.current);
+      setTruncatedText(truncated);
+    } else {
       setIsTextInside(textRef.current.getBBox().width < width);
+
     }
-  }, [textRef, width]);
+  }, [isInCollapsedGroup, task.name, width]);
 
   const x = useMemo(() => {
     if (isTextInside) {
@@ -338,9 +364,16 @@ const TaskItemInner: React.FC<TaskItemProps> = props => {
     if (rtl && textRef.current) {
       return x1 - textRef.current.getBBox().width - arrowIndent * 0.8;
     }
-
     return x1 + width + arrowIndent * 1.2;
   }, [x1, width, isTextInside, rtl, arrowIndent]);
+
+
+  const textForRender = isInCollapsedGroup
+    ? ""
+    : task.name;
+
+  console.log("testForRender", textForRender)
+  const xForRender = isInCollapsedGroup ? (x1 + width * 0.5) : x;
 
   const onMouseDown = useCallback<MouseEventHandler>(
     event => {
@@ -361,8 +394,6 @@ const TaskItemInner: React.FC<TaskItemProps> = props => {
   }, [setTooltipTask]);
 
   let barLabelFill = (isTextInside || task.type == "milestone") ? styles.barLabelColor : styles.barLabelWhenOutsideColor;
-
-  //let testing = (!enableTaskGrouping || isTextInside) ? task.name : ''
 
   return (
     <g
@@ -388,7 +419,7 @@ const TaskItemInner: React.FC<TaskItemProps> = props => {
       {taskItem}
       <text
         fill={barLabelFill}
-        x={x}
+        x={xForRender}
         y={taskYOffset + taskHeight * 0.5}
         className={
           isTextInside
@@ -397,9 +428,7 @@ const TaskItemInner: React.FC<TaskItemProps> = props => {
         }
         ref={textRef}
       >
-        {enableTaskGrouping
-          ? (isTextInside ? task.name : "")
-          : task.name}
+        {textForRender}
       </text>
 
       {(outOfParentWarnings || hasDependencyWarning) && (
