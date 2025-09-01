@@ -14,7 +14,7 @@ export const truncateText = (text: string, maxWidth: number, textElement: SVGTex
 
     while (start <= end) {
         const mid = Math.floor((start + end) / 2);
-        const truncated = text.substring(0, mid) + '...';
+        const truncated = text.substring(0, mid);
         textElement.textContent = truncated;
         const truncatedWidth = textElement.getBBox().width;
 
