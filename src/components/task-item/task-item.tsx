@@ -232,7 +232,7 @@ const TaskItemInner: React.FC<TaskItemProps> = props => {
   const [isTextInside, setIsTextInside] = useState(true);
 
   const [truncatedText, setTruncatedText] = useState(task.name);
-
+  console.log("truncatedText", truncatedText)
 
   const taskItem = useMemo(() => {
     const isFromStartRelationAuthorized =
