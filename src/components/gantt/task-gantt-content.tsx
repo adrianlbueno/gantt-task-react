@@ -159,11 +159,21 @@ export const TaskGanttContent: React.FC<TaskGanttContentProps> = ({
         }
       } else {
         const task = mapGlobalRowIndexToTask.get(index);
+
         if (task) tasksAtRow.push(task);
       }
+
+
       for (const task of tasksAtRow) {
         const comparisonLevel = task.comparisonLevel ?? 1;
         const { id: taskId } = task;
+
+        const isInCollapsedGroup = enableTaskGrouping &&
+          task.parent &&
+          tasksAtRow.length > 1;
+
+        console.log('isInCollapsedGroup :>> ', isInCollapsedGroup);
+
 
         if (selectedIdsMirror[taskId] && !addedSelectedTasks[taskId]) {
           addedSelectedTasks[taskId] = true;
@@ -206,6 +216,7 @@ export const TaskGanttContent: React.FC<TaskGanttContentProps> = ({
             key={key}
           >
             <TaskItem
+              isInCollapsedGroup={isInCollapsedGroup}
               enableTaskGrouping={enableTaskGrouping}
               taskToRowIndexMap={taskToRowIndexMap}
               rowIndexToTasksMap={rowIndexToTasksMap}
@@ -369,7 +380,7 @@ export const TaskGanttContent: React.FC<TaskGanttContentProps> = ({
     selectedIdsMirror,
     visibleTasksMirror,
     rowIndexToTasksMap,
-    enableTaskGrouping
+    enableTaskGrouping,
   ]);
 
   return (

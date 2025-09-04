@@ -19,3 +19,8 @@
   user-select: none;
   pointer-events: none;
 }
+
+.barLabelTruncated {
+  text-anchor: middle;
+  dominant-baseline: middle;
+}

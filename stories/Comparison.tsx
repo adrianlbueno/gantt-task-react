@@ -60,11 +60,11 @@ export const Comparison: React.FC = props => {
         onEditTask={onEditTask}
         onClick={handleClick}
         tasks={tasks}
-        viewMode={ViewMode.Year}
+        viewMode={ViewMode.Day}
         distances={{
           minimumRowDisplayed: 10,
           rowHeight: 50,
-          columnWidth: 300,
+          columnWidth: 250,
         }}
         canResizeColumns={true}
       />

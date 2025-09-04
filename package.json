@@ -129,5 +129,10 @@
     "moduleNameMapper": {
       "/~.+\\.module\\.(css|sass|scss)$/": "identity-obj-proxy"
     }
+  },
+  "eslintConfig": {
+    "extends": [
+      "plugin:storybook/recommended"
+    ]
   }
 }

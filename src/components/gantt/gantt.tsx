@@ -1853,6 +1853,7 @@ export const Gantt: React.FC<GanttProps> = ({
   const barProps: TaskGanttContentProps = useMemo(
     () => ({
       enableTaskGrouping,
+      taskMap: tasksMap,
       rowIndexToTasksMap,
       authorizedRelations,
       additionalLeftSpace,
@@ -1904,6 +1905,7 @@ export const Gantt: React.FC<GanttProps> = ({
       additionalLeftSpace,
       additionalRightSpace,
       enableTaskGrouping,
+      tasksMap,
       rowIndexToTasksMap,
       checkIsHoliday,
       childOutOfParentWarnings,

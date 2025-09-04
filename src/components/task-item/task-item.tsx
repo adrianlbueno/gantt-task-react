@@ -8,7 +8,6 @@ import React, {
   useState,
 } from "react";
 
-import { truncateText } from "../../helpers/truncate-task-label";
 import { GanttRelationEvent } from "../../types/gantt-task-actions";
 import {
   BarMoveAction,
@@ -32,9 +31,10 @@ import style from "./task-list.module.css";
 import { TaskWarning } from "./task-warning";
 
 export type TaskItemProps = {
-  children?: React.ReactNode
+  children?: React.ReactNode;
   getTaskGlobalIndexByRef: (task: Task) => number;
   hasChildren: boolean;
+  isInCollapsedGroup: boolean;
   rowIndexToTasksMap: RowIndexToTasksMap;
   taskToRowIndexMap: TaskToRowIndexMap;
   hasDependencyWarning: boolean;
@@ -103,11 +103,10 @@ const TaskItemInner: React.FC<TaskItemProps> = props => {
     isRelationChangeable,
     ganttRelationEvent,
     rtl,
+    enableTaskGrouping,
+    isInCollapsedGroup,
     selectTaskOnMouseDown,
     setTooltipTask,
-    enableTaskGrouping,
-    taskToRowIndexMap,
-    rowIndexToTasksMap,
     task,
     task: { styles: taskStyles },
 
@@ -180,15 +179,6 @@ const TaskItemInner: React.FC<TaskItemProps> = props => {
     fixEndPosition(task, end.date, globalIndex);
   }, [task, fixEndPosition, outOfParentWarnings, getTaskGlobalIndexByRef]);
 
-  const taskRowIndex =
-    taskToRowIndexMap?.get(task.comparisonLevel ?? 1)?.get(task.id);
-
-  if (taskRowIndex === undefined) return null;
-
-  const isSharedRow =
-    (rowIndexToTasksMap?.get(task.comparisonLevel ?? 1)?.get(taskRowIndex)?.length ?? 0) > 1;
-
-  const isInCollapsedGroup = !!enableTaskGrouping && isSharedRow;
 
   const handleClick = useCallback(
     (event: React.MouseEvent<SVGElement>) => {
@@ -230,9 +220,8 @@ const TaskItemInner: React.FC<TaskItemProps> = props => {
 
   const textRef = useRef<SVGTextElement>(null);
   const [isTextInside, setIsTextInside] = useState(true);
+  //const [text, setText] = useState(task.name);
 
-  const [truncatedText, setTruncatedText] = useState(task.name);
-  console.log("truncatedText", truncatedText)
 
   const taskItem = useMemo(() => {
     const isFromStartRelationAuthorized =
@@ -344,17 +333,13 @@ const TaskItemInner: React.FC<TaskItemProps> = props => {
     width,
   ]);
 
+  const isGrouped = enableTaskGrouping && isInCollapsedGroup;
+
   useEffect(() => {
-    if (!textRef.current) return;
-
-    if (isInCollapsedGroup) {
-      const truncated = truncateText(task.name, width - 10, textRef.current);
-      setTruncatedText(truncated);
-    } else {
+    if (textRef.current) {
       setIsTextInside(textRef.current.getBBox().width < width);
-
     }
-  }, [isInCollapsedGroup, task.name, width]);
+  }, [textRef, width]);
 
   const x = useMemo(() => {
     if (isTextInside) {
@@ -367,13 +352,11 @@ const TaskItemInner: React.FC<TaskItemProps> = props => {
     return x1 + width + arrowIndent * 1.2;
   }, [x1, width, isTextInside, rtl, arrowIndent]);
 
-
-  const textForRender = isInCollapsedGroup
+  const textForRender = isGrouped
     ? ""
-    : task.name;
+    :
+    task.name
 
-  console.log("testForRender", textForRender)
-  const xForRender = isInCollapsedGroup ? (x1 + width * 0.5) : x;
 
   const onMouseDown = useCallback<MouseEventHandler>(
     event => {
@@ -394,6 +377,20 @@ const TaskItemInner: React.FC<TaskItemProps> = props => {
   }, [setTooltipTask]);
 
   let barLabelFill = (isTextInside || task.type == "milestone") ? styles.barLabelColor : styles.barLabelWhenOutsideColor;
+
+
+  let defaultBehavior = isTextInside
+    ? style.barLabel
+    : style.barLabel && style.barLabelOutside
+
+  //let defaultGroup = isTextInside
+  //  ? style.barLabel : style.barLabe && style.barbarLabelTruncated;
+
+  //let testing = isGrouped ? defaultGroup : defaultBehavior;
+
+  // let testingLabelFill = isGrouped
+  //   ? (isTextInside ? styles.barLabelColor : styles.barLabelWhenOutsideColor)
+  //   : barLabelFill;
 
   return (
     <g
@@ -419,12 +416,10 @@ const TaskItemInner: React.FC<TaskItemProps> = props => {
       {taskItem}
       <text
         fill={barLabelFill}
-        x={xForRender}
+        x={x}
         y={taskYOffset + taskHeight * 0.5}
         className={
-          isTextInside
-            ? style.barLabel
-            : style.barLabel && style.barLabelOutside
+          defaultBehavior
         }
         ref={textRef}
       >

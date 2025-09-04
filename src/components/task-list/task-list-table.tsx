@@ -133,7 +133,6 @@ const TaskListTableDefaultInner: React.FC<TaskListTableProps> = ({
             [depth, indexStr] = taskIndex;
           }
 
-          console.log('colors :>> ', colors);
           renderList.push(
             <TaskListTableRow
               key={id}
