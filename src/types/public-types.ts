@@ -187,6 +187,7 @@ export interface Task {
   comparisonLevel?: number;
   status?: string;
   phase?: string;
+  taskOwner?: string;
 }
 
 export interface EmptyTask {
@@ -198,6 +199,7 @@ export interface EmptyTask {
   comparisonLevel?: number;
   status?: string;
   phase?: string;
+  taskOwner?: string;
   displayOrder?: number;
   isDisabled?: boolean;
   styles?: Partial<ColorStyles>;
