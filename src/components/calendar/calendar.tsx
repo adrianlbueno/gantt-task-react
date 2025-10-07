@@ -141,7 +141,6 @@ export const Calendar: React.FC<CalendarProps> = ({
 
         const year = date.getFullYear();
 
-        console.log('Fulll year :>> ', year);
         const topValue = year.toString();
         const startHalfYearIndex = i - date.getMonth();
 

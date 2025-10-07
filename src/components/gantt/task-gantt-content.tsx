@@ -172,9 +172,6 @@ export const TaskGanttContent: React.FC<TaskGanttContentProps> = ({
           task.parent &&
           tasksAtRow.length > 1;
 
-        console.log('isInCollapsedGroup :>> ', isInCollapsedGroup);
-
-
         if (selectedIdsMirror[taskId] && !addedSelectedTasks[taskId]) {
           addedSelectedTasks[taskId] = true;
 
