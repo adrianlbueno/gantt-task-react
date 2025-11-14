@@ -287,7 +287,7 @@ export const Gantt: React.FC<GanttProps> = ({
 
   const [visibleTasks, visibleTasksMirror] = useMemo(
     () => collectVisibleTasks(childTasksMap, rootTasksMap, enableTaskGrouping),
-    [childTasksMap, rootTasksMap]
+    [childTasksMap, rootTasksMap, enableTaskGrouping]
   );
 
   const tasksMap = useMemo(() => getTasksMap(tasks), [tasks]);

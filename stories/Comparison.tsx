@@ -1,9 +1,13 @@
 import React, { useCallback, useState } from "react";
 import "../dist/style.css";
 import { Gantt, OnChangeTasks, Task, TaskOrEmpty, ViewMode } from "../src";
+import { ViewSwitcher } from "../example/src/components/view-switcher";
 import { initTasksUser, onAddTask, onEditTask } from "./helper";
 
 export const Comparison: React.FC = props => {
+  const [viewMode, setViewMode] = useState(ViewMode.Week)
+  const [isChecked, setIsChecked] = useState(true)
+  
   const [tasks, setTasks] = useState<readonly TaskOrEmpty[]>(() => {
     const firstLevelTasks = initTasksUser();
 
@@ -50,6 +54,9 @@ export const Comparison: React.FC = props => {
 
   return (
     <div >
+      <div>
+        <ViewSwitcher  onViewModeChange={(viewMode)=>setViewMode(viewMode)} onViewListChange={setIsChecked} isChecked={isChecked}/>
+      </div>
       <Gantt
         {...props}
         enableTaskGrouping={true}
@@ -60,10 +67,10 @@ export const Comparison: React.FC = props => {
         onEditTask={onEditTask}
         onClick={handleClick}
         tasks={tasks}
-        viewMode={ViewMode.Day}
+        viewMode={viewMode}
         distances={{
           minimumRowDisplayed: 10,
-          rowHeight: 50,
+          rowHeight: 150,
           columnWidth: 250,
         }}
         canResizeColumns={true}

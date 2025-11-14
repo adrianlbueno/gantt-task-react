@@ -2,7 +2,6 @@ import React, { useCallback } from "react";
 import type { TaskItemProps } from "../task-item";
 import { BarDisplay } from "./bar-display";
 import stylesRelationHandle from "./bar-relation-handle.module.css";
-
 import { BarMoveAction } from "../../../types/public-types";
 import { BarDateHandle } from "./bar-date-handle";
 import styles from "./bar.module.css";
@@ -46,6 +45,7 @@ export const BarSmall: React.FC<
         tabIndex={0}
       >
         <BarDisplay
+          imageUrl={task.imageUrl}
           taskName={task.name}
           barCornerRadius={barCornerRadius}
           hasChildren={hasChildren}

@@ -128,7 +128,8 @@ export function initTasksUser(): TaskOrEmpty[] {
       end: new Date(currentDate.getFullYear(), currentDate.getMonth(), 15),
       progress: 70,
       displayOrder: 4,
-      parent: "user-cooler"
+      parent: "user-cooler", 
+      imageUrl:"https://www.caterpoint.de/thumbnail/e3/49/12/1733565611/25100-0_1920.webp"
     },
     {
       id: "user-coolerer",

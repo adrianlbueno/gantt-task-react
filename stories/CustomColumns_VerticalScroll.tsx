@@ -13,7 +13,7 @@ import {
   TitleColumn,
 } from "../src";
 
-import { initTasks, onAddTask, onEditTask } from "./helper";
+import { initTasksUser, onAddTask, onEditTask } from "./helper";
 
 import "../dist/style.css";
 import {
@@ -84,7 +84,7 @@ export const getColumns = (
 };
 
 export const CustomColumns_VerticalScroll: React.FC = props => {
-  const [tasks, setTasks] = useState<readonly TaskOrEmpty[]>(initTasks());
+  const [tasks, setTasks] = useState<readonly TaskOrEmpty[]>(initTasksUser());
 
   const onChangeTasks = useCallback<OnChangeTasks>((nextTasks, action) => {
     switch (action.type) {
