@@ -96,7 +96,6 @@ export const Bar: React.FC<
   } else {
     barDisplay = (
       <BarDisplay
-        imageUrl={task.imageUrl}
         taskName={task.name}
         x={x1}
         y={taskYOffset}

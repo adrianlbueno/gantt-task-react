@@ -19,7 +19,6 @@ type BarDisplayProps = {
   width: number;
   x: number;
   y: number;
-  imageUrl:string;
 };
 
 export const BarDisplay: React.FC<BarDisplayProps> = ({
@@ -35,8 +34,7 @@ export const BarDisplay: React.FC<BarDisplayProps> = ({
   styles,
   width,
   x,
-  y,
-  imageUrl
+  y
 }) => {
   const processColor = useMemo(() => {
     if (isCritical) {
@@ -136,15 +134,6 @@ export const BarDisplay: React.FC<BarDisplayProps> = ({
         rx={barCornerRadius}
         fill={processColor}
       />
-      {
-        imageUrl && <image  style={{width:300, position:"relative"}}
-          href={imageUrl}  
-          x={x + 5}  
-          y={y + 2}  
-          width={width}  
-          height={height}  
-        />  
-      } 
     </g>
   );
 };

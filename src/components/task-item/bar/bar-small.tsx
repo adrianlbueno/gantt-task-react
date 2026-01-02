@@ -45,7 +45,6 @@ export const BarSmall: React.FC<
         tabIndex={0}
       >
         <BarDisplay
-          imageUrl={task.imageUrl}
           taskName={task.name}
           barCornerRadius={barCornerRadius}
           hasChildren={hasChildren}
