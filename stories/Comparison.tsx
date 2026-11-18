@@ -1,13 +1,13 @@
 import React, { useCallback, useState } from "react";
 import "../dist/style.css";
-import { Gantt, OnChangeTasks, Task, TaskOrEmpty, ViewMode } from "../src";
 import { ViewSwitcher } from "../example/src/components/view-switcher";
+import { Gantt, OnChangeTasks, Task, TaskOrEmpty, ViewMode } from "../src";
 import { initTasksUser, onAddTask, onEditTask } from "./helper";
 
 export const Comparison: React.FC = props => {
-  const [viewMode, setViewMode] = useState(ViewMode.Week)
-  const [isChecked, setIsChecked] = useState(true)
-  
+  const [viewMode, setViewMode] = useState(ViewMode.Week);
+  const [isChecked, setIsChecked] = useState(true);
+
   const [tasks, setTasks] = useState<readonly TaskOrEmpty[]>(() => {
     const firstLevelTasks = initTasksUser();
 
@@ -19,6 +19,7 @@ export const Comparison: React.FC = props => {
 
     return [...firstLevelTasks];
   });
+
 
   const onChangeTasks = useCallback<OnChangeTasks>((nextTasks, action) => {
     switch (action.type) {
@@ -55,7 +56,7 @@ export const Comparison: React.FC = props => {
   return (
     <div >
       <div>
-        <ViewSwitcher  onViewModeChange={(viewMode)=>setViewMode(viewMode)} onViewListChange={setIsChecked} isChecked={isChecked}/>
+        <ViewSwitcher onViewModeChange={(viewMode) => setViewMode(viewMode)} onViewListChange={setIsChecked} isChecked={isChecked} />
       </div>
       <Gantt
         {...props}

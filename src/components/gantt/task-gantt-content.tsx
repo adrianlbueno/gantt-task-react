@@ -175,7 +175,10 @@ export const TaskGanttContent: React.FC<TaskGanttContentProps> = ({
         if (selectedIdsMirror[taskId] && !addedSelectedTasks[taskId]) {
           addedSelectedTasks[taskId] = true;
 
-          const rowIndex = taskToRowIndexMap.get(comparisonLevel)?.get(taskId);
+          const rowIndex = enableTaskGrouping
+            ? index
+            : taskToRowIndexMap.get(comparisonLevel)?.get(taskId);
+
           if (typeof rowIndex === "number") {
             selectedTasksRes.push(
               <rect
