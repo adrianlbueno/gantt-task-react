@@ -1,7 +1,7 @@
-import React, { ReactNode, useMemo } from "react";
-import { GridBody, GridBodyProps } from "./grid-body";
-import { ViewMode } from "../../types/public-types";
 import { differenceInDays } from "date-fns";
+import React, { ReactNode, useMemo } from "react";
+import { ViewMode } from "../../types/public-types";
+import { GridBody, GridBodyProps } from "./grid-body";
 
 export type GridProps = GridBodyProps;
 export const Grid: React.FC<GridProps> = props => {

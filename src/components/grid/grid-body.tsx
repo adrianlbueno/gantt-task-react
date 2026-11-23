@@ -95,7 +95,7 @@ const GridBodyInner: React.FC<GridBodyProps> = ({
             y1={0}
             y2={ganttFullHeight}
             stroke={dividerColor}
-            opacity={0.15}
+            opacity={0.30}
             strokeWidth={2}
           />
         );

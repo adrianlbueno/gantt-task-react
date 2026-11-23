@@ -1,4 +1,5 @@
 import { ViewMode } from "..";
+import { getWeekNumberISO8601 } from "./date-helper";
 
 export const shouldDrawVerticalDivider = (
     currentDate: Date,
@@ -40,11 +41,11 @@ export const shouldDrawVerticalDivider = (
             );
 
         case ViewMode.Week:
-            // Divider at month change
-            return (
-                currentDate.getMonth() !== previousDate.getMonth() ||
-                currentDate.getFullYear() !== previousDate.getFullYear()
-            );
+             return (
+            getWeekNumberISO8601(currentDate) !==
+            getWeekNumberISO8601(previousDate) ||
+            currentDate.getFullYear() !== previousDate.getFullYear()
+        );
 
         case ViewMode.Day:
             // Divider at day change
