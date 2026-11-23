@@ -462,7 +462,13 @@ export const Gantt: React.FC<GanttProps> = ({
   } = useSelection(taskToRowIndexMap, rowIndexToTaskMap, checkTaskIdExists);
 
   const [startDate, minTaskDate, datesLength] = useMemo(
-    () => ganttDateRange(visibleTasks, viewMode, preStepsCount),
+    () => {
+      const testing = ganttDateRange(visibleTasks, viewMode, preStepsCount);
+      console.log("testing", testing);
+      return testing;
+    }
+
+    ,
     [visibleTasks, viewMode, preStepsCount]
   );
 

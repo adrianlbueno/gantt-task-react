@@ -22,8 +22,16 @@ export function initTasksUser(): TaskOrEmpty[] {
       id: "audit-1",
       type: "task",
       name: "Audit 1 first in the list",
-      start: new Date(currentDate.getFullYear(), currentDate.getMonth(), 8),
-      end: new Date(currentDate.getFullYear(), currentDate.getMonth(), 12),
+      start: new Date(
+        currentDate.getFullYear() - 1,
+        currentDate.getMonth(),
+        8
+      ),
+      end: new Date(
+        currentDate.getFullYear() - 1,
+        currentDate.getMonth(),
+        12
+      ),
       progress: 50,
       parent: "user-1",
     },
@@ -128,7 +136,7 @@ export function initTasksUser(): TaskOrEmpty[] {
       end: new Date(currentDate.getFullYear(), currentDate.getMonth(), 15),
       progress: 70,
       displayOrder: 4,
-      parent: "user-cooler", 
+      parent: "user-cooler",
     },
     {
       id: "user-coolerer",

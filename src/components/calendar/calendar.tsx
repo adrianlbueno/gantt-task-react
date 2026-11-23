@@ -157,7 +157,7 @@ export const Calendar: React.FC<CalendarProps> = ({
             yText={topDefaultHeight * 0.9}
             colors={colors}
           />
-        )
+        );
       }
     }
 
@@ -195,18 +195,20 @@ export const Calendar: React.FC<CalendarProps> = ({
           date.getFullYear() !== getDate(i - 1).getFullYear())
       ) {
         const topValue = date.getFullYear().toString();
-        const startQuarter = Math.floor(i / 3) * 3;
+
+        const quarterIndex = Math.floor(date.getMonth() / 3);
+        const startYearIndex = i - quarterIndex;
 
         topValues.push(
           <TopPartOfCalendar
             key={topValue}
             value={topValue}
-            x1Line={additionalLeftSpace + columnWidth * startQuarter}
+            x1Line={additionalLeftSpace + columnWidth * startYearIndex}
             y1Line={0}
             y2Line={topDefaultHeight}
             xText={
               additionalLeftSpace +
-              columnWidth * (startQuarter + 1.5) // Center the text
+              columnWidth * (startYearIndex + 2)
             }
             yText={topDefaultHeight * 0.9}
             colors={colors}

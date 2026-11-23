@@ -33,6 +33,7 @@ export const ganttDateRange = (
 ): [Date, Date, number] => {
   let minTaskDate: Date | null = null;
   let maxTaskDate: Date | null = null;
+
   for (const task of tasks) {
     if (task.type !== "empty" && task.type !== "user") {
       if (!minTaskDate || task.start < minTaskDate) {
@@ -53,29 +54,41 @@ export const ganttDateRange = (
   let newEndDate: Date | null = null;
 
   switch (viewMode) {
-    case ViewMode.Year:
-      newStartDate = subYears(minTaskDate, preStepsCount);
-      newStartDate = startOfYear(newStartDate);
-      newEndDate = addYears(maxTaskDate, 1);
-      newEndDate = startOfYear(newEndDate);
+        case ViewMode.Year:
+            newStartDate = startOfYear(
+        subYears(minTaskDate, preStepsCount)
+      );
+
+      newEndDate = startOfYear(
+        addYears(maxTaskDate, 1)
+      );
       break;
-    case ViewMode.HalfYear:
-      newStartDate = subMonths(minTaskDate, preStepsCount * 6);
-      newStartDate = startOfHalfYear(newStartDate);
-      newEndDate = addMonths(maxTaskDate, 6);
-      newEndDate = startOfHalfYear(addMonths(newEndDate, 6));
+        case ViewMode.HalfYear:
+          newStartDate = startOfHalfYear(
+        subMonths(minTaskDate, preStepsCount * 6)
+      );
+
+      newEndDate = startOfHalfYear(
+        addMonths(maxTaskDate, 6)
+      );
       break;
-    case ViewMode.QuarterYear:
-      newStartDate = subMonths(minTaskDate, preStepsCount * 3);
-      newStartDate = startOfQuarter(newStartDate);
-      newEndDate = addMonths(maxTaskDate, 3);
-      newEndDate = startOfQuarter(addMonths(newEndDate, 3));
+        case ViewMode.QuarterYear:
+          newStartDate = startOfQuarter(
+        subMonths(minTaskDate, preStepsCount * 3)
+      );
+
+      newEndDate = startOfQuarter(
+        addMonths(maxTaskDate, 3)
+      );
       break;
-    case ViewMode.Month:
-      newStartDate = subMonths(minTaskDate, preStepsCount);
-      newStartDate = startOfMonth(newStartDate);
-      newEndDate = addYears(maxTaskDate, 1);
-      newEndDate = startOfYear(newEndDate);
+        case ViewMode.Month:
+      newStartDate = startOfMonth(
+        subMonths(minTaskDate, preStepsCount)
+      );
+
+      newEndDate = startOfMonth(
+        addMonths(maxTaskDate, 1)
+      );
       break;
     case ViewMode.Week:
       newStartDate = startOfWeek(minTaskDate);
